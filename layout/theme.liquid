@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="{{ request.locale.iso_code }}">
   <head>
+    {{ 'application.min.css' | asset_url | stylesheet_tag }}
     {% # Inlined CSS Variables %}
     {% render 'css-variables' %}
 
@@ -14,6 +15,7 @@
   </head>
 
   <body>
+    <body class="bg-red-200">
     {% sections 'header-group' %}
 
     {{ content_for_layout }}
