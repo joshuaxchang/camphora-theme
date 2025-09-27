@@ -1,52 +1,150 @@
 {% comment %}
-  This section is used in the product template to render product page with
-  media, content, and add-to-cart form.
-
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/product
+  We are putting the padding and max-width container back in.
+  This is the most reliable way to handle spacing.
 {% endcomment %}
+<div class="max-w-5xl mx-auto px-4 py-16">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+    <div class="w-full md:sticky top-24">
+      <div class="bg-gray-200 aspect-square rounded-lg shadow-lg flex items-center justify-center">
+        <p class="text-gray-500">Media gallery placeholder</p>
+      </div>
+    </div>
 
-<div class="product-images">
-  {% for image in product.images %}
-    {% render 'image', class: 'product-image', image: image %}
-  {% endfor %}
+    <div class="pt-4">
+      <h1 class="font-heading text-4xl font-bold mb-4 text-brand-text">{{ product.title }}</h1>
+
+      {%- form 'product', product, id: "product-form", novalidate: 'novalidate' -%}
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+
+        <div class="mb-8">
+          <div class="flex items-center gap-4 mb-6">
+            <p class="text-3xl font-light text-brand-primary">
+              {{ product.price | money_without_trailing_zeros }}
+            </p>
+            <div class="text-gray-400">
+                ★★★★★ (0 reviews)
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <button
+              type="submit"
+              name="add"
+              id="add-to-cart-button"
+              class="w-full bg-brand-primary text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none"
+              {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}
+            >
+              <span>Add to Cart</span>
+            </button>
+            <button
+              type="button"
+              id="buy-now-button"
+              class="w-full bg-brand-text text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-70 disabled:transform-none"
+              {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}
+            >
+              <span>Buy Now</span>
+            </button>
+          </div>
+
+          <div class="dynamic-checkout-buttons hidden">
+            {{ form | payment_button }}
+          </div>
+        </div>
+      {%- endform -%}
+
+      <div class="prose max-w-none text-gray-700">
+        {{ product.description }}
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="product-info">
-  <h1>{{ product.title }}</h1>
-  <p>{{ product.price | money }}</p>
-  <p>{{ product.description }}</p>
-</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const productForm = document.getElementById('product-form');
+    if (!productForm) return;
 
-<div class="product-form">
-  {% form 'product', product %}
-    {% assign current_variant = product.selected_or_first_available_variant %}
+    const addToCartButton = document.getElementById('add-to-cart-button');
+    const buyNowButton = document.getElementById('buy-now-button');
+    const spinnerIcon = `<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
-    <select name="id">
-      {% for variant in product.variants %}
-        <option
-          value="{{ variant.id }}"
-          {% if variant == current_variant %}
-            selected="selected"
-          {% endif %}
-        >
-          {{ variant.title }} - {{ variant.price | money }}
-        </option>
-      {% endfor %}
-    </select>
+    // --- Add to Cart Logic ---
+    productForm.addEventListener('submit', function (event) {
+      event.preventDefault();
 
-    <input type="text" name="quantity" min="1" value="1">
+      addToCartButton.disabled = true;
+      buyNowButton.disabled = true;
+      addToCartButton.querySelector('span').innerHTML = `<div class="flex justify-center items-center">${spinnerIcon}</div>`;
 
-    <input type="submit" value="Add to cart">
-    {{ form | payment_button }}
-  {% endform %}
-</div>
+      const formData = new FormData(productForm);
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error(response.status);
+          return response.json();
+        })
+        .then(() => {
+          addToCartButton.querySelector('span').textContent = '✓ Added!';
+          // Find all cart icons/buttons and shake them
+          document.querySelectorAll('#open-cart-button').forEach((btn) => {
+            btn.classList.add('animate-shake');
+            setTimeout(() => {
+              btn.classList.remove('animate-shake');
+            }, 600);
+          });
+          // TODO: Update cart drawer/count here
+          setTimeout(() => {
+            addToCartButton.disabled = false;
+            buyNowButton.disabled = false;
+            addToCartButton.querySelector('span').textContent = 'Add to Cart';
+          }, 1000);
+        })
+        .catch((error) => {
+          console.error(error);
+          addToCartButton.querySelector('span').textContent = 'Error!';
+          setTimeout(() => {
+            addToCartButton.disabled = false;
+            buyNowButton.disabled = false;
+            addToCartButton.querySelector('span').textContent = 'Add to Cart';
+          }, 2000);
+        });
+    });
+
+    // --- Buy Now Logic ---
+    buyNowButton.addEventListener('click', function () {
+      buyNowButton.disabled = true;
+      addToCartButton.disabled = true;
+      buyNowButton.querySelector('span').innerHTML = `<div class="flex justify-center items-center">${spinnerIcon}</div>`;
+
+      // Find the real, hidden Shopify "Buy it now" button
+      const realShopifyButton = productForm.querySelector('.shopify-payment-button__button');
+
+      if (realShopifyButton) {
+        // Programmatically click the real button to trigger the special checkout
+        realShopifyButton.click();
+      } else {
+        // Fallback or error handling if the button isn't found
+        console.error('Dynamic checkout button not found.');
+        buyNowButton.querySelector('span').textContent = 'Error!';
+        setTimeout(() => {
+            buyNowButton.disabled = false;
+            addToCartButton.disabled = false;
+            buyNowButton.querySelector('span').textContent = 'Buy Now';
+        }, 2000);
+      }
+    });
+  });
+</script>
 
 {% schema %}
-{
-  "name": "t:general.product",
-  "settings": [],
-  "disabled_on": {
-    "groups": ["header", "footer"]
+  {
+    "name": "t:general.product",
+    "settings": [],
+    "disabled_on": {
+      "groups": ["header", "footer"]
+    }
   }
-}
 {% endschema %}
