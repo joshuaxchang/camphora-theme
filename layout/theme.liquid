@@ -37,10 +37,9 @@
           cartDrawer.classList.add('translate-x-full');
           backdrop.classList.remove('opacity-100');
           backdrop.classList.add('opacity-0');
-          // We no longer add 'invisible' here. It's handled below.
         }
 
-        // NEW: Listen for the transition on the backdrop to finish
+        // Listen for the transition on the backdrop to finish
         backdrop.addEventListener('transitionend', function() {
           // If the opacity is 0 (meaning it just finished fading out)
           if (backdrop.classList.contains('opacity-0')) {

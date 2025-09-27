@@ -1,0 +1,35 @@
+<section class="py-28 px-4 text-center bg-gradient-to-b from-white to-brand-bg">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="font-heading text-2xl md:text-3xl font-bold mb-4 text-brand-text">
+      {{ section.settings.title }}
+    </h1>
+    <p class="text-xl text-gray-700 max-w-2xl mx-auto">
+      {{ section.settings.text }}
+    </p>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Welcome Section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Welcome to Camphora Studio"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "This site is still under construction."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Welcome Section"
+    }
+  ]
+}
+{% endschema %}
