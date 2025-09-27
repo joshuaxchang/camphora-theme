@@ -5,34 +5,47 @@
 <div class="max-w-5xl mx-auto px-4 py-16">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
     <div class="w-full md:sticky top-24">
-      {% comment %} Main gallery with navigation buttons {% endcomment %}
-      <div class="swiper main-gallery aspect-square rounded-lg shadow-lg mb-4 overflow-hidden">
+      <div class="swiper main-gallery aspect-square rounded-lg shadow-lg mb-4 overflow-hidden relative">
         <div class="swiper-wrapper">
           {%- for media in product.media -%}
-            <div class="swiper-slide">
-              {{ media | image_url: width: 1024 | image_tag:
-                loading: 'lazy',
-                class: 'w-full h-full object-cover',
-                sizes: '(min-width: 768px) 50vw, 100vw',
-                widths: '400, 600, 800, 1024'
-              }}
+            <div class="swiper-slide" data-media-id="{{ media.id }}">
+              <img
+                src="{{ media | image_url: width: 1024 }}"
+                loading="lazy"
+                class="w-full h-full object-cover cursor-zoom-in zoomable-image"
+                sizes="(min-width: 768px) 50vw, 100vw"
+                srcset="{{ media | image_url: width: 400 }} 400w,
+                        {{ media | image_url: width: 600 }} 600w,
+                        {{ media | image_url: width: 800 }} 800w,
+                        {{ media | image_url: width: 1024 }} 1024w"
+                width="{{ media.preview_image.width }}"
+                height="{{ media.preview_image.height }}"
+                data-full-src="{{ media | image_url: width: 1600 }}"
+                alt="{{ media.alt | escape }}"
+              >
             </div>
           {%- endfor -%}
         </div>
+
+        <div class="swiper-nav-zone swiper-nav-zone-prev"></div>
+        <div class="swiper-nav-zone swiper-nav-zone-next"></div>
+
         <div class="swiper-button-prev text-white"></div>
         <div class="swiper-button-next text-white"></div>
       </div>
 
-      {% comment %} Thumbnails gallery {% endcomment %}
-      <div class="swiper thumbs-gallery h-24">
+      <div class="swiper thumbs-gallery h-20">
         <div class="swiper-wrapper">
           {%- for media in product.media -%}
             <div class="swiper-slide cursor-pointer rounded-md overflow-hidden">
-              {{ media | image_url: width: 150 | image_tag:
-                loading: 'lazy',
-                class: 'w-full h-full object-cover',
-                sizes: '100px'
-              }}
+              <img
+                src="{{ media | image_url: width: 150 }}"
+                loading="lazy"
+                class="w-full h-full object-cover"
+                width="{{ media.preview_image.width }}"
+                height="{{ media.preview_image.height }}"
+                alt="{{ media.alt | escape }}"
+              >
             </div>
           {%- endfor -%}
         </div>
@@ -125,67 +138,146 @@
   </div>
 </div>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+  window.variantsData = {{ product.variants | json }};
+</script>
+
+<style>
+  body.no-scroll { overflow: hidden; }
+  .main-gallery { --swiper-navigation-color: #fff; }
+  .thumbs-gallery .swiper-slide { opacity: 0.5; transition: opacity 0.3s ease; }
+  .thumbs-gallery .swiper-slide-thumb-active {
+    opacity: 1;
+    border: 2px solid {{ settings.colors.accent_1 | default: '#000' }};
+  }
+  #zoom-content { -ms-overflow-style: none; scrollbar-width: none; }
+  #zoom-content::-webkit-scrollbar { display: none; }
+  #zoom-content img { width: 100%; height: auto; max-width: 100%; object-fit: contain; cursor: zoom-out; }
+  .swiper-nav-zone { position: absolute; top: 0; width: 20%; height: 100%; z-index: 10; cursor: pointer; }
+  .swiper-nav-zone-prev { left: 0; }
+  .swiper-nav-zone-next { right: 0; }
+  .swiper-button-prev, .swiper-button-next { z-index: 20 !important; }
+</style>
+
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // --- INITIAL SETUP & SHARED VARIABLES ---
     const productForm = document.getElementById('product-form');
     if (!productForm) return;
 
     const addToCartButton = document.getElementById('add-to-cart-button');
     const buyNowButton = document.getElementById('buy-now-button');
     const spinnerIcon = `<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-    // --- Variant Selection Logic ---
-    const variantRadios = document.querySelectorAll('input[type="radio"]');
-    const productPriceElement = document.getElementById('product-price');
-    const hiddenVariantInput = productForm.querySelector('[name="id"]');
-    const variantsData = {{ product.variants | json }};
 
-    variantRadios.forEach(radio => {
-      radio.addEventListener('change', () => {
-        const selectedOptions = Array.from(document.querySelectorAll('input[type="radio"]:checked')).map(r => r.value);
-        
-        const matchedVariant = variantsData.find(variant => {
-          // Check if every selected option matches the variant's options
-          return selectedOptions.every((optionValue, index) => {
-            return variant.options[index] === optionValue;
-          });
-        });
+    // --- SWIPER GALLERY INITIALIZATION ---
+    const thumbsSwiper = new Swiper('.thumbs-gallery', {
+      loop: false, spaceBetween: 10, slidesPerView: 5, freeMode: true, watchSlidesProgress: true,
+    });
+    const mainSwiper = new Swiper('.main-gallery', {
+      loop: true, spaceBetween: 10, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }, thumbs: { swiper: thumbsSwiper },
+    });
 
-        if (matchedVariant) {
-          // Update the hidden input with the new variant ID
-          hiddenVariantInput.value = matchedVariant.id;
+    // --- LARGE NAVIGATION ZONES LOGIC ---
+    document.querySelector('.swiper-nav-zone-prev').addEventListener('click', () => mainSwiper.slidePrev());
+    document.querySelector('.swiper-nav-zone-next').addEventListener('click', () => mainSwiper.slideNext());
 
-          // Update the price on the page
-          const price = (matchedVariant.price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }).replace('.00', '');
-          productPriceElement.textContent = price;
+    // --- CUSTOM ZOOM LOGIC ---
+    const zoomOverlay = document.getElementById('zoom-overlay');
+    const zoomContent = document.getElementById('zoom-content');
+    const zoomClose = document.getElementById('zoom-close');
+    const zoomableImages = document.querySelectorAll('.zoomable-image');
+    let scrollOffset = 20;
 
-          // Update button availability
-          if (matchedVariant.available) {
-            addToCartButton.disabled = false;
-            buyNowButton.disabled = false;
-            addToCartButton.querySelector('span').textContent = 'Add to Cart';
+    zoomableImages.forEach(thumb => {
+      const highResImage = document.createElement('img');
+      highResImage.src = thumb.dataset.fullSrc;
+      highResImage.dataset.mediaId = thumb.closest('.swiper-slide').dataset.mediaId;
+      zoomContent.appendChild(highResImage);
+    });
+
+    const allZoomedImages = zoomContent.querySelectorAll('img');
+    if (allZoomedImages.length > 1) {
+      const gap = parseInt(window.getComputedStyle(allZoomedImages[1]).marginTop, 10);
+      scrollOffset = gap * 2;
+    }
+
+    zoomableImages.forEach((image, index) => {
+      image.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const clickedMediaId = image.closest('.swiper-slide').dataset.mediaId;
+        const targetImageInZoom = zoomContent.querySelector(`img[data-media-id="${clickedMediaId}"]`);
+        zoomOverlay.classList.remove('hidden');
+        setTimeout(() => zoomOverlay.classList.remove('opacity-0'), 10);
+        document.body.classList.add('no-scroll');
+        requestAnimationFrame(() => {
+          if (!targetImageInZoom) return;
+          if (index === 0) {
+            zoomContent.scrollTo({ top: 0, behavior: 'smooth' });
           } else {
-            addToCartButton.disabled = true;
-            buyNowButton.disabled = true;
-            addToCartButton.querySelector('span').textContent = 'Sold Out';
+            zoomContent.scrollTop = targetImageInZoom.offsetTop - scrollOffset;
           }
-        }
+        });
       });
     });
 
-    // --- Custom Quantity Selector Logic ---
+    const closeZoom = () => {
+      zoomOverlay.classList.add('opacity-0');
+      document.body.classList.remove('no-scroll');
+      setTimeout(() => zoomOverlay.classList.add('hidden'), 300);
+    };
+
+    zoomClose.addEventListener('click', closeZoom);
+    zoomOverlay.addEventListener('click', (e) => { if (e.target === zoomOverlay) closeZoom(); });
+    zoomContent.addEventListener('click', closeZoom);
+
+    // --- VARIANT SELECTION & SYNCING LOGIC ---
+    const productPriceElement = document.getElementById('product-price');
+    const hiddenVariantInput = productForm.querySelector('[name="id"]');
+    const variantRadios = productForm.querySelectorAll('input[type="radio"]');
+
+    variantRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        setTimeout(() => {
+          const selectedOptions = Array.from(productForm.querySelectorAll('input[type="radio"]:checked')).map(r => r.value);
+          const matchedVariant = window.variantsData.find(v => {
+            return selectedOptions.every((optionValue, index) => v.options[index] === optionValue);
+          });
+
+          if (!matchedVariant) return;
+
+          // Update price, hidden ID, and button state
+          hiddenVariantInput.value = matchedVariant.id;
+          productPriceElement.textContent = (matchedVariant.price / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }).replace('.00', '');
+          const isAvailable = matchedVariant.available;
+          addToCartButton.disabled = !isAvailable;
+          buyNowButton.disabled = !isAvailable;
+          addToCartButton.querySelector('span').textContent = isAvailable ? 'Add to Cart' : 'Sold Out';
+
+          // Sync with gallery
+          if (matchedVariant.featured_media) {
+            const targetMediaId = matchedVariant.featured_media.id;
+            const targetSlide = document.querySelector(`.swiper-slide[data-media-id="${targetMediaId}"]`);
+            if (targetSlide) {
+              const slideIndex = Array.from(targetSlide.parentNode.children).indexOf(targetSlide);
+              mainSwiper.slideToLoop(slideIndex);
+            }
+          }
+        }, 50);
+      });
+    });
+
+    // --- QUANTITY SELECTOR LOGIC ---
     const quantityInput = document.getElementById('quantity-input');
     const plusButton = document.getElementById('quantity-plus');
     const minusButton = document.getElementById('quantity-minus');
 
     if (quantityInput && plusButton && minusButton) {
-      plusButton.addEventListener('click', () => {
-        quantityInput.stepUp();
-      });
-
-      minusButton.addEventListener('click', () => {
-        // stepDown() will not go below `min` attribute (which is 1)
-        quantityInput.stepDown();
-      });
+      plusButton.addEventListener('click', () => quantityInput.stepUp());
+      minusButton.addEventListener('click', () => quantityInput.stepDown());
     }
 
     // --- Add to Cart Logic ---
@@ -272,50 +364,6 @@
   });
 </script>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-<style>
-  /* Custom styles for the gallery */
-  .main-gallery {
-    --swiper-navigation-color: #fff;
-  }
-  .thumbs-gallery .swiper-slide {
-    opacity: 0.5;
-    transition: opacity 0.3s ease;
-  }
-  .thumbs-gallery .swiper-slide-thumb-active {
-    opacity: 1;
-    border: 2px solid #000; /* Use your brand color variable here if you have one */
-  }
-</style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Initialize the thumbnail swiper first
-    const thumbsSwiper = new Swiper('.thumbs-gallery', {
-      loop: false, // It's better not to loop thumbnails for clarity
-      spaceBetween: 10,
-      slidesPerView: 4,
-      freeMode: true,
-      watchSlidesProgress: true,
-    });
-
-    // Initialize the main swiper
-    const mainSwiper = new Swiper('.main-gallery', {
-      loop: true,
-      spaceBetween: 10,
-      navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-      },
-      // Link it to the thumbnail swiper
-      thumbs: {
-        swiper: thumbsSwiper,
-      },
-    });
-  });
-</script>
 
 {% schema %}
   {
