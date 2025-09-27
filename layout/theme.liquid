@@ -16,7 +16,7 @@
         {{ content_for_layout }}
     </main>
 
-    {% comment %} We will add the footer later {% endcomment %}
+    {% section 'footer' %}
     <div id="cart-drawer-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 invisible opacity-0 transition-opacity duration-300"></div>    
     {% render 'cart-drawer' %}
     <script>
