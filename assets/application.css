@@ -48,6 +48,19 @@
   animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
 }
 
+/* Hide arrows from number inputs */
+/* Chrome, Safari, Edge, Opera */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

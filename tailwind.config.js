@@ -18,7 +18,7 @@ module.exports = {
         'brand-text': '#6D5D4D',
         'brand-primary': '#4C8562',
         'brand-primary-hover': '#3E6B50',
-        'brand-accent': '#C9B5A3',
+        'brand-accent': '#c5ad98ff',
         'brand-accent-light': '#F0F3F5',
       },
       fontFamily: {
