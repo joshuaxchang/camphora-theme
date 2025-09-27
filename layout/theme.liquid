@@ -93,5 +93,13 @@
         }
       });
     </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const headerSection = document.getElementById('shopify-section-header');
+        if (headerSection) {
+          headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md', 'sticky', 'top-0', 'z-30');
+        }
+      });
+    </script>
 </body>
 </html>

@@ -1,49 +1,50 @@
-<div class="max-w-5xl mx-auto px-4">
+<header class="relative">
+  <div class="max-w-5xl mx-auto px-4">
     <div class="flex items-center justify-between h-20">
-        <div class="shrink-0 mr-4">
-            <a href="/" class="flex items-center gap-2">
-                <img src="{{ 'camphora-logo.svg' | asset_url }}" alt="Camphora Studio Logo" class="w-8 h-8">
-                <span class="text-xl font-bold text-brand-text">Camphora Studio</span>
-            </a>
-        </div>
+      <div class="shrink-0 mr-4">
+        <a href="/" class="flex items-center gap-2">
+          <img src="{{ 'camphora-logo.svg' | asset_url }}" alt="Camphora Studio Logo" class="w-8 h-8">
+          <span class="text-xl font-bold text-brand-text">Camphora Studio</span>
+        </a>
+      </div>
 
-        <nav class="hidden md:flex md:grow">
-            <ul class="flex grow justify-end flex-wrap items-center">
-                <li><a href="/#products" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Products</a></li>
-                <li><a href="/about" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">About</a></li>
-                <li><a href="/contact" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Contact</a></li>
-            </ul>
-        </nav>
+      <nav class="hidden md:flex md:grow">
+        <ul class="flex grow justify-end flex-wrap items-center">
+          <li><a href="/#products" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Products</a></li>
+          <li><a href="/about" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">About</a></li>
+          <li><a href="/contact" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Contact</a></li>
+        </ul>
+      </nav>
 
-        <div class="flex items-center gap-2">
-            <button type="button" id="open-cart-button" class="relative block w-6 h-6">
-                {% render 'icon-cart' %}
-                <span class="absolute -top-2 -right-2.5 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {{ cart.item_count }}
-                </span>
-            </button>
-            <div class="md:hidden">
-                <button id="hamburger-button" class="p-2" aria-label="Open menu">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                    </svg>
-                </button>
-            </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="open-cart-button" class="relative block w-6 h-6">
+          {% render 'icon-cart' %}
+          <span class="absolute -top-2 -right-2.5 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+            {{ cart.item_count }}
+          </span>
+        </button>
+        <div class="md:hidden">
+          <button id="hamburger-button" class="p-2" aria-label="Open menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+          </button>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<div id="mobile-menu" class="md:hidden hidden absolute top-full right-4 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+  <div id="mobile-menu" class="md:hidden hidden absolute top-full right-4 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
     <ul class="px-2 py-2">
-        <li><a href="/#products" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">Products</a></li>
-        <li><a href="/about" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">About</a></li>
-        <li><a href="/contact" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">Contact</a></li>
+      <li><a href="/#products" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">Products</a></li>
+      <li><a href="/about" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">About</a></li>
+      <li><a href="/contact" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">Contact</a></li>
     </ul>
-</div>
+  </div>
+</header>
 
 {% schema %}
 {
-  "name": "Header",
-  "class": "shopify-section-header bg-brand-bg/80 backdrop-blur-md sticky top-0 z-30"
+  "name": "Header"
 }
 {% endschema %}
