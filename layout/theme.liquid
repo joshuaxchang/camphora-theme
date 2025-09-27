@@ -17,25 +17,40 @@
     </main>
 
     {% comment %} We will add the footer later {% endcomment %}
+    <div id="cart-drawer-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 invisible opacity-0 transition-opacity duration-300"></div>    
     {% render 'cart-drawer' %}
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        // --- Cart Drawer Code ---
         const cartDrawer = document.getElementById('cart-drawer');
         const openCartButton = document.getElementById('open-cart-button');
         const closeCartButton = document.getElementById('close-cart-drawer');
+        const backdrop = document.getElementById('cart-drawer-backdrop');
 
         function openDrawer() {
+          backdrop.classList.remove('invisible');
           cartDrawer.classList.remove('translate-x-full');
+          backdrop.classList.remove('opacity-0');
+          backdrop.classList.add('opacity-100');
         }
 
         function closeDrawer() {
           cartDrawer.classList.add('translate-x-full');
+          backdrop.classList.remove('opacity-100');
+          backdrop.classList.add('opacity-0');
+          // We no longer add 'invisible' here. It's handled below.
         }
+
+        // NEW: Listen for the transition on the backdrop to finish
+        backdrop.addEventListener('transitionend', function() {
+          // If the opacity is 0 (meaning it just finished fading out)
+          if (backdrop.classList.contains('opacity-0')) {
+            backdrop.classList.add('invisible');
+          }
+        });
 
         if (openCartButton) {
           openCartButton.addEventListener('click', function(event) {
-            event.preventDefault();
+            event.stopPropagation();
             openDrawer();
           });
         }
@@ -43,12 +58,23 @@
         if (closeCartButton) {
           closeCartButton.addEventListener('click', closeDrawer);
         }
+        
+        document.addEventListener('click', function(event) {
+          if (!cartDrawer.classList.contains('translate-x-full') && !cartDrawer.contains(event.target)) {
+            closeDrawer();
+          }
+        });
 
-        // --- Hamburger Menu Code (pasted from header) ---
+        cartDrawer.addEventListener('click', function(event) {
+          event.stopPropagation();
+        });
+
+
+        // --- Hamburger Menu Code ---
         const hamburgerButton = document.getElementById('hamburger-button');
         const mobileMenu = document.getElementById('mobile-menu');
 
-        if (hamburgerButton && mobileMenu) { // Good practice to check if elements exist
+        if (hamburgerButton && mobileMenu) {
           hamburgerButton.addEventListener('click', (e) => {
             e.stopPropagation();
             mobileMenu.classList.toggle('hidden');
