@@ -7,9 +7,9 @@
 
   <div id="cart-items" class="flex-grow p-4 overflow-y-auto">
     {% if cart.item_count > 0 %}
-      <ul class="space-y-5">
+      <ul>
         {% for item in cart.items %}
-          <li class="flex items-center justify-between gap-4" data-line-item-key="{{ item.key }}">
+          <li class="flex items-center justify-between gap-4 mb-5 last:mb-0" data-line-item-key="{{ item.key }}">
             
             <div class="flex-grow flex items-center gap-4">
               <div class="item-image flex-shrink-0">
@@ -17,21 +17,21 @@
                   <img src="{{ item.image | image_url: width: 160, height: 160, crop: 'center' }}" alt="{{ item.title | escape }}" class="w-16 h-16 object-cover rounded">
                 </a>
               </div>
-              <div class="item-info flex flex-col justify-center"> <a href="{{ item.url }}" class="item-title font-semibold text-brand-text hover:text-brand-primary-hover hover:underline transition-colors block">{{ item.product.title }}</a>
-  
-  {% unless item.variant.title contains 'Default' %}
-    <p class="item-variant text-sm text-gray-500 cart-item-meta {% if item.variant.title != blank %}is-visible{% endif %}">
-      {{ item.variant.title }}
-    </p>
-  {% endunless %}
-
-  <p class="item-unit-price text-sm text-gray-400 cart-item-meta {% if item.quantity > 1 %}is-visible{% endif %}">
-    {{ item.variant.price | money_without_trailing_zeros }}
-  </p>
-
-</div>
+              <div class="item-info flex flex-col justify-center">
+                <a href="{{ item.url }}" class="item-title font-semibold text-brand-text hover:text-brand-primary-hover hover:underline transition-colors block">{{ item.product.title }}</a>
+                
+                {%- unless item.variant.title contains 'Default' -%}
+                  <p class="item-variant text-sm text-gray-500 cart-item-meta {% if item.variant.title != blank %}is-visible{% endif %}">
+                    {{ item.variant.title }}
+                  </p>
+                {%- endunless -%}
+                
+                <p class="item-unit-price text-sm text-gray-400 cart-item-meta {% if item.quantity > 1 %}is-visible{% endif %}">
+                  {{ item.variant.price | money_without_trailing_zeros }}
+                </p>
+              </div>
             </div>
-
+            
             <div class="flex-shrink-0 flex items-center gap-4">
               <div class="item-actions">
                 <div class="item-quantity-selector flex items-center border rounded-lg p-1">
@@ -52,7 +52,7 @@
                       </svg>
                     {% endif %}
                   </button>
-                  <input type="number" value="{{ item.quantity }}" min="1" class="w-8 text-center bg-transparent border-none focus:ring-0 font-bold text-gray-800 p-0" aria-label="Quantity" data-last-valid-quantity="{{ item.quantity }}">
+                  <input type="number" value="{{ item.quantity }}" min="1" class="w-8 text-center bg-transparent border-none focus:ring-0 font-bold text-brand-text p-0" aria-label="Quantity" data-last-valid-quantity="{{ item.quantity }}">
                   <button type="button" class="quantity-plus w-6 h-6 flex items-center justify-center text-gray-500 hover:text-brand-accent transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                   </button>
@@ -60,7 +60,7 @@
               </div>
 
               <div class="total w-16 text-right">
-                <div class="item-line-total h-7 flex items-center justify-end text-brand-primary">
+                <div class="item-line-total h-7 flex items-center justify-end text-brand-text">
                   <p class="font-bold">{{ item.line_price | money_without_trailing_zeros }}</p>
                 </div>
               </div>
@@ -75,14 +75,14 @@
 
   <div class="flex-shrink-0 border-t p-4">
     <div id="cart-footer" {% if cart.item_count == 0 %}class="hidden"{% endif %}>
-      <div class="flex justify-between items-center mb-2">
-        <p class="text-xl font-normal">Subtotal</p>
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-xl font-semibold text-brand-text">Subtotal</p>
         <p id="cart-subtotal" class="text-xl font-semibold text-brand-primary transition-all duration-200 ease-in-out">{{ cart.total_price | money_without_trailing_zeros }}</p>      </div>
       <p class="text-xs font-light text-gray-500 mb-4">
         Taxes & <a href="/policy#shipping" class="font-medium text-brand-text/80 underline hover:text-brand-primary-hover transition-colors">Shipping</a> calculated at checkout
       </p>
-      <a href="/checkout" class="w-full text-center bg-brand-primary text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 block h-12 flex items-center justify-center shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transform hover:-translate-y-1">
-        Checkout
+      <a href="/checkout" id="checkout-button" class="w-full text-center bg-brand-primary text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 block h-12 flex items-center justify-center shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transform hover:-translate-y-1">
+        <span>Checkout</span>
       </a>
     </div>
   </div>
@@ -111,15 +111,15 @@
     transition: all 0.2s ease-in-out;
   }
 
-  /* UPDATED: For the smooth "float up" removal animation */
   li.is-removing {
-    transition: max-height 0.3s ease, opacity 0.3s ease;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
     overflow: hidden;
     max-height: 0 !important;
     opacity: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     border-width: 0 !important;
+    margin-bottom: 0 !important;
   }
 </style>
 
@@ -134,7 +134,7 @@
     // --- SVG Icon Templates ---
     const minusIconSVG = `<svg xmlns="http://www.w.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>`;
     const trashIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>`;
-    const spinnerSVG = `<svg class="animate-spin h-5 w-5 text-brand-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+    const spinnerSVG = `<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
     // --- Helper Functions ---
     const formatMoney = (cents) => {
@@ -176,7 +176,7 @@
       const cartItemsEl = document.getElementById('cart-items');
       const updatedItemKeys = new Set(cart.items.map(item => item.key));
 
-      ccartItemsEl.querySelectorAll('li[data-line-item-key]').forEach(li => {
+      cartItemsEl.querySelectorAll('li[data-line-item-key]').forEach(li => {
         const key = li.dataset.lineItemKey;
         if (updatedItemKeys.has(key)) {
           const item = cart.items.find(i => i.key === key);
@@ -200,7 +200,6 @@
           if (minusButton) {
             minusButton.innerHTML = item.quantity > 1 ? minusIconSVG : trashIconSVG;
             
-            // START: Add these lines to set the final correct hover class
             if (item.quantity > 1) {
               minusButton.classList.remove('hover:text-red-500');
               minusButton.classList.add('hover:text-brand-accent');
@@ -208,7 +207,6 @@
               minusButton.classList.remove('hover:text-brand-accent');
               minusButton.classList.add('hover:text-red-500');
             }
-            // END: Add these lines
           }
         } else {
           li.classList.add('is-removing');
@@ -303,6 +301,25 @@
 
     cartDrawer.addEventListener('click', function(event) {
       if (event.target.closest('#close-cart-drawer')) { closeDrawer(); return; }
+
+      const checkoutButton = event.target.closest('#checkout-button');
+      if (checkoutButton) {
+        event.preventDefault(); // Stop the link from navigating immediately
+        const span = checkoutButton.querySelector('span');
+
+        // Apply disabled/loading state
+        checkoutButton.classList.add('opacity-70', 'pointer-events-none');
+        checkoutButton.classList.remove('hover:shadow-xl', 'hover:-translate-y-1');
+        if (span) {
+          span.innerHTML = `<div class="flex justify-center items-center">${spinnerSVG}</div>`;
+        }
+
+        // Navigate after a short delay to allow the user to see the feedback
+        setTimeout(() => {
+          window.location.href = checkoutButton.href;
+        }, 300);
+        return; // Stop further execution
+      }
 
       const button = event.target.closest('.quantity-minus, .quantity-plus');
       if (!button) return;
