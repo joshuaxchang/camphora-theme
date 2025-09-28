@@ -1,0 +1,61 @@
+<div id="cart-drawer-content" class="flex flex-col h-full">
+  <div class="flex-grow p-4">
+    {% if cart.item_count > 0 %}
+      <ul class="space-y-5">
+        {% for item in cart.items %}
+          <li class="flex items-center gap-4" data-line-item-key="{{ item.key }}">
+            <a href="{{ item.url }}" class="flex-shrink-0">
+              <img src="{{ item.image | image_url: width: 200, height: 200, crop: 'center' }}" alt="{{ item.title | escape }}" class="w-20 h-20 object-cover rounded">
+            </a>
+
+            <div class="flex-grow flex flex-col">
+              <a href="{{ item.url }}" class="font-semibold text-gray-900 block">{{ item.product.title }}</a>
+              {% unless item.variant.title contains 'Default' %}
+                <span class="text-sm text-gray-500 block">{{ item.variant.title }}</span>
+              {% endunless %}
+              {% if item.quantity > 1 %}
+                <span class="text-sm font-light text-gray-500 block mt-1">{{ item.final_price | money_without_trailing_zeros }}</span>
+              {% endif %}
+            </div>
+
+            <div class="flex-shrink-0 flex flex-col items-center">
+              <div class="flex items-center border rounded-lg p-1">
+                <button type="button" class="quantity-minus w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
+                </button>
+                <input type="number" value="{{ item.quantity }}" min="0" class="w-8 text-center bg-transparent border-none focus:ring-0 font-bold text-gray-800 p-0" aria-label="Quantity">
+                <button type="button" class="quantity-plus w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                </button>
+              </div>
+              <button type="button" class="cart-remove-button text-xs text-gray-500 underline hover:text-red-500 mt-1" data-line-key="{{ item.key }}">
+                Remove
+              </button>
+            </div>
+            
+            <div class="flex-shrink-0 w-20 text-right">
+              <p class="font-bold">{{ item.line_price | money_without_trailing_zeros }}</p>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-500 text-center mt-10">Your cart is empty.</p>
+    {% endif %}
+  </div>
+
+  <div class="flex-shrink-0 border-t p-4">
+    <div id="cart-footer" {% if cart.item_count == 0 %}class="hidden"{% endif %}>
+      <div class="flex justify-between items-center mb-2">
+        <p class="text-xl font-normal">Subtotal</p>
+        <p id="cart-subtotal" class="text-xl font-semibold">{{ cart.total_price | money_without_trailing_zeros }}</p>
+      </div>
+      <p class="text-xs font-light text-gray-500 mb-4">
+        Taxes & Shipping calculated at checkout
+      </p>
+      <a href="/checkout" class="w-full text-center bg-brand-primary text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 block h-12 flex items-center justify-center shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transform hover:-translate-y-1">
+        Checkout
+      </a>
+    </div>
+  </div>
+</div>
