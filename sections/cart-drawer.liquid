@@ -1,0 +1,244 @@
+<div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-40 flex flex-col">
+
+  <div id="cart-loading-overlay" class="absolute inset-0 bg-white/50 backdrop-blur-[1.5px] z-10 flex items-center justify-center transition-opacity duration-300 ease-in-out opacity-0 pointer-events-none">    <svg class="animate-spin h-10 w-10 text-brand-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  </div>
+
+  <div class="flex-shrink-0 flex justify-between items-center border-b p-4">
+    <h2 class="text-2xl font-bold">Your Cart</h2>
+    <button id="close-cart-drawer" class="text-brand-accent hover:text-brand-text text-4xl font-semibold p-2 leading-none">&times;</button>
+  </div>
+
+  <div id="cart-items" class="flex-grow p-4 overflow-y-auto">
+    {% if cart.item_count > 0 %}
+      <ul class="space-y-5">
+        {% for item in cart.items %}
+          <li class="flex items-center justify-between gap-4" data-line-item-key="{{ item.key }}">
+            <div class="flex-grow flex items-start gap-4">
+              <div class="item-image flex-shrink-0">
+                <a href="{{ item.url }}">
+                  <img src="{{ item.image | image_url: width: 160, height: 160, crop: 'center' }}" alt="{{ item.title | escape }}" class="w-16 h-16 object-cover rounded">
+                </a>
+              </div>
+              <div class="item-info">
+                <a href="{{ item.url }}" class="item-title font-semibold text-gray-900 block">{{ item.product.title }}</a>
+                {% unless item.variant.title contains 'Default' %}
+                  <p class="item-variant text-sm text-gray-500">{{ item.variant.title }}</p>
+                {% endunless %}
+                {% if item.quantity > 1 %}
+                  <p class="item-unit-price text-sm text-gray-500">{{ item.variant.price | money_without_trailing_zeros }}</p>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="flex-shrink-0 flex items-start gap-1">
+              <div class="item-actions">
+                <div class="item-quantity-selector flex items-center border rounded-lg p-1">
+                  <button type="button" class="quantity-minus w-6 h-6 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors">
+                    {% if item.quantity > 1 %}
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" /></svg>
+                    {% else %}
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    {% endif %}
+                  </button>
+                  <input type="number" value="{{ item.quantity }}" min="1" class="w-8 text-center bg-transparent border-none focus:ring-0 font-bold text-gray-800 p-0" aria-label="Quantity">
+                  <button type="button" class="quantity-plus w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="total w-16 text-right">
+                <p class="item-line-total font-bold pt-2">{{ item.line_price | money_without_trailing_zeros }}</p>
+              </div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-500 text-center mt-10">Your cart is empty.</p>
+    {% endif %}
+  </div>
+
+  <div class="flex-shrink-0 border-t p-4">
+    <div id="cart-footer" {% if cart.item_count == 0 %}class="hidden"{% endif %}>
+      <div class="flex justify-between items-center mb-2">
+        <p class="text-xl font-normal">Subtotal</p>
+        <p id="cart-subtotal" class="text-xl font-semibold">{{ cart.total_price | money_without_trailing_zeros }}</p>
+      </div>
+      <p class="text-xs font-light text-gray-500 mb-4">
+        Taxes & Shipping calculated at checkout
+      </p>
+      <a href="/checkout" class="w-full text-center bg-brand-primary text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 block h-12 flex items-center justify-center shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transform hover:-translate-y-1">
+        Checkout
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- Cart Drawer Elements ---
+    const cartDrawer = document.getElementById('cart-drawer');
+    const openCartButtons = document.querySelectorAll('#open-cart-button');
+    const backdrop = document.getElementById('cart-drawer-backdrop');
+    let debounceTimer;
+
+    // --- Helper functions for fade effect ---
+    const showLoadingState = () => {
+        const loadingOverlay = document.getElementById('cart-loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        }
+    };
+    const hideLoadingState = () => {
+        const loadingOverlay = document.getElementById('cart-loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('opacity-0', 'pointer-events-none');
+        }
+    };
+
+    // --- Open/Close Drawer Logic ---
+    const openDrawer = () => {
+      if (!backdrop || !cartDrawer) return;
+      backdrop.classList.remove('invisible', 'opacity-0');
+      cartDrawer.classList.remove('translate-x-full');
+    };
+
+    const closeDrawer = () => {
+      if (!backdrop || !cartDrawer) return;
+      cartDrawer.classList.add('translate-x-full');
+      backdrop.classList.add('opacity-0');
+    };
+    
+    if (backdrop) {
+        backdrop.addEventListener('transitionend', () => {
+            if (backdrop.classList.contains('opacity-0')) {
+                backdrop.classList.add('invisible');
+            }
+        });
+    }
+
+    openCartButtons.forEach(button => button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        openDrawer();
+    }));
+
+    if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+    // --- Core Update Logic ---
+    const updateCartDrawer = () => {
+      const fetchURL = '/cart?section_id=cart-drawer';
+      fetch(fetchURL)
+        .then(response => response.text())
+        .then(text => {
+          const html = new DOMParser().parseFromString(text, 'text/html');
+          const newDrawerContent = html.querySelector('#cart-drawer');
+          if (newDrawerContent) {
+            cartDrawer.innerHTML = newDrawerContent.innerHTML;
+          } else {
+            console.error("Could not find #cart-drawer in the fetched HTML.");
+            hideLoadingState();
+          }
+        })
+        .catch(e => {
+            console.error('Error fetching cart drawer:', e);
+            hideLoadingState();
+        });
+    };
+
+    const updateQuantity = (key, quantity) => {
+      showLoadingState();
+
+      fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: key, quantity: quantity }),
+      })
+      .then(response => response.json())
+      .then(cart => {
+        updateCartDrawer();
+        const cartCountSpan = document.getElementById('cart-item-count');
+        if (cartCountSpan) {
+          cartCountSpan.textContent = cart.item_count;
+          cartCountSpan.classList.toggle('hidden', cart.item_count === 0);
+        }
+      })
+      .catch((error) => {
+          console.error('Error updating quantity:', error);
+          hideLoadingState();
+      });
+    };
+
+    // --- Master Event Listeners (Delegated) ---
+    cartDrawer.addEventListener('click', function(event) {
+        if (event.target.closest('#close-cart-drawer')) {
+            closeDrawer();
+            return;
+        }
+
+        const button = event.target.closest('.quantity-minus, .quantity-plus');
+        if (!button) return;
+
+        const lineItem = button.closest('li');
+        if (!lineItem) return;
+
+        const key = lineItem.dataset.lineItemKey;
+        const input = lineItem.querySelector('input[type="number"]');
+        let currentQuantity = parseInt(input.value);
+
+        if (button.classList.contains('quantity-plus')) {
+            input.value = currentQuantity + 1;
+            input.dataset.lastValidValue = input.value;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => { updateQuantity(key, currentQuantity + 1); }, 400);
+        } else if (button.classList.contains('quantity-minus')) {
+            if (currentQuantity > 1) {
+                input.value = currentQuantity - 1;
+                input.dataset.lastValidValue = input.value;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => { updateQuantity(key, currentQuantity - 1); }, 400);
+            } else {
+                input.value = 0;
+                clearTimeout(debounceTimer);
+                updateQuantity(key, 0);
+            }
+        }
+    });
+
+    cartDrawer.addEventListener('input', function(event) {
+        if (event.target.matches('input[type="number"]')) {
+            const input = event.target;
+            const lineItem = input.closest('li');
+            if (!lineItem) return;
+
+            if (!input.dataset.lastValidValue) {
+                input.dataset.lastValidValue = input.value;
+            }
+
+            const quantity = parseInt(input.value);
+
+            if (isNaN(quantity) || quantity < 1) {
+                input.addEventListener('focusout', () => {
+                    input.value = input.dataset.lastValidValue;
+                }, { once: true });
+                return;
+            }
+            
+            input.dataset.lastValidValue = quantity;
+            const key = lineItem.dataset.lineItemKey;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                updateQuantity(key, quantity);
+            }, 400);
+        }
+    });
+
+    document.addEventListener('cart:added', () => updateCartDrawer());
+  });
+</script>

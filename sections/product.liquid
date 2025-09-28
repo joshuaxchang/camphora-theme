@@ -320,7 +320,7 @@
             }, 600);
           });
 
-          // TODO: Update cart drawer here
+          document.dispatchEvent(new CustomEvent('cart:added'));
           setTimeout(() => {
             addToCartButton.disabled = false;
             buyNowButton.disabled = false;
