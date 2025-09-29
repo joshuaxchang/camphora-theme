@@ -1,9 +1,9 @@
-<header class="relative">
+<header class="relative md:h-20 max-h-20 md:max-h-20 overflow-hidden transition-[max-height] duration-300 ease-in-out">
   <div class="max-w-5xl mx-auto px-4">
     <div class="relative flex items-center justify-between h-20">
 
       <div class="flex items-center">
-        <div class="md:hidden">
+        <div class="md-hidden">
           <button id="hamburger-button" class="p-2 -ml-2" aria-label="Open menu" aria-expanded="false">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path id="hamburger-icon-open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h12"></path>
@@ -37,7 +37,24 @@
           </span>
         </button>
       </div>
+    </div>
+  </div>
 
+  <!-- Mobile Menu Content -->
+  <div id="mobile-menu-content" class="h-[calc(100vh-5rem)] flex flex-col justify-between md:hidden">
+    <div class="p-4">
+      <ul class="space-y-4 text-center">
+        <li><a href="/#products" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">Products</a></li>
+        <li><a href="/blogs/tutorials" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">Tutorials</a></li>
+        <li><a href="/pages/about" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">About</a></li>
+        <li><a href="/pages/contact" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">Contact</a></li>
+      </ul>
+    </div>
+    <div class="p-4 border-t border-white/10">
+      <ul class="space-y-2 text-center">
+        <li><a href="/pages/shipping-returns-policy" class="block py-1 text-sm text-gray-600 hover:text-brand-text">Shipping & Returns</a></li>
+        <li><a href="/pages/privacy-policy" class="block py-1 text-sm text-gray-600 hover:text-brand-text">Privacy Policy</a></li>
+      </ul>
     </div>
   </div>
 </header>
@@ -46,30 +63,27 @@
 document.addEventListener('DOMContentLoaded', () => {
   // --- Mobile Menu Drawer Elements ---
   const hamburgerButton = document.getElementById('hamburger-button');
-  const menuContainer = document.getElementById('mobile-menu-container');
-  const menuWrapper = document.getElementById('mobile-menu-wrapper');
-  const backdrop = document.getElementById('mobile-menu-backdrop');
+  const headerElement = hamburgerButton.closest('header');
   const openIcon = document.getElementById('hamburger-icon-open');
   const closeIcon = document.getElementById('hamburger-icon-close');
 
   const toggleMenu = (isOpen) => {
     if (isOpen) {
+      // If at the very top, scroll down 1px to prevent layout shift
+      if (window.scrollY === 0) {
+        window.scrollTo(0, 1);
+      }
       document.body.classList.add('body-no-scroll');
-      menuContainer.classList.remove('invisible');
-      // Use a timeout to ensure the transform starts after the element is visible, preventing animation glitches
-      setTimeout(() => {
-        menuWrapper.classList.remove('-translate-x-full');
-        backdrop.classList.remove('opacity-0');
-      }, 10); // A tiny delay is all that's needed
+      headerElement.classList.add('max-h-screen');
+      headerElement.classList.remove('max-h-20');
       // Toggle icon
       openIcon.classList.add('hidden');
       closeIcon.classList.remove('hidden');
       hamburgerButton.setAttribute('aria-expanded', 'true');
     } else {
       document.body.classList.remove('body-no-scroll');
-      // Start animations
-      menuWrapper.classList.add('-translate-x-full');
-      backdrop.classList.add('opacity-0');
+      headerElement.classList.add('max-h-20');
+      headerElement.classList.remove('max-h-screen');
       // Toggle icon
       openIcon.classList.remove('hidden');
       closeIcon.classList.add('hidden');
@@ -80,14 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
   hamburgerButton.addEventListener('click', () => {
     const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
     toggleMenu(!isExpanded);
-  });
-
-  backdrop.addEventListener('click', () => toggleMenu(false));
-
-  menuWrapper.addEventListener('transitionend', (event) => {
-    if (event.propertyName === 'transform' && menuWrapper.classList.contains('-translate-x-full')) {
-      menuContainer.classList.add('invisible');
-    }
   });
 
   // --- Sticky Header Style Script ---
@@ -103,3 +109,4 @@ document.addEventListener('DOMContentLoaded', () => {
   "name": "Header"
 }
 {% endschema %}
+
