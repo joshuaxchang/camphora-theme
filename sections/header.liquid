@@ -63,96 +63,117 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // --- Mobile Menu Drawer Elements ---
+  // --- Element Definitions ---
   const hamburgerButton = document.getElementById('hamburger-button');
   const headerElement = hamburgerButton.closest('header');
   const headerSection = document.getElementById('shopify-section-header');
-  const mainElement = document.querySelector('main'); // Use querySelector for robustness
+  const mainElement = document.querySelector('main');
   const footerSection = document.getElementById('shopify-section-footer');
   const openIcon = document.getElementById('hamburger-icon-open');
   const closeIcon = document.getElementById('hamburger-icon-close');
-  const mobileMenuLinks = document.querySelectorAll('#mobile-menu-content a');
 
-  let hackApplied = false; // --- New flag to track if the hack is active ---
+  // A flag to ensure the "short page" height adjustment only runs once.
+  let hackApplied = false;
 
-  const toggleMenu = (isOpen) => {
+  // --- Master Menu Toggle Function (with Callback) ---
+  const toggleMenu = (isOpen, callback) => {
+    const onTransitionEnd = () => {
+      if (typeof callback === 'function') {
+        callback();
+      }
+      headerElement.removeEventListener('transitionend', onTransitionEnd);
+    };
+
     if (isOpen) {
       const isScrollable = document.documentElement.scrollHeight > window.innerHeight;
-
       const performOpening = () => {
         document.body.classList.add('body-no-scroll');
         headerElement.classList.add('max-h-screen');
         headerElement.classList.remove('max-h-20');
+        // Correctly toggle icons
         openIcon.classList.add('hidden');
         closeIcon.classList.remove('hidden');
         hamburgerButton.setAttribute('aria-expanded', 'true');
       };
 
+      // This logic handles visual glitches on pages with very little content.
       if (!isScrollable && mainElement && footerSection) {
-        // Only apply the hack if it hasn't been applied already
         if (!hackApplied) {
           const headerHeight = headerSection ? headerSection.offsetHeight : 0;
           const mainHeight = mainElement.offsetHeight;
           const footerHeight = footerSection.offsetHeight;
-          
-
           const totalContentHeight = headerHeight + mainHeight + footerHeight;
           const viewportHeight = window.innerHeight;
-
           if (totalContentHeight <= viewportHeight) {
             const neededHeight = (viewportHeight - totalContentHeight) + 1;
             const newFooterMinHeight = footerHeight + neededHeight;
             footerSection.style.minHeight = `${newFooterMinHeight}px`;
-            hackApplied = true; // --- Set the flag ---
+            hackApplied = true;
           }
         }
-        
         requestAnimationFrame(() => {
           window.scrollTo(0, 1);
           performOpening();
         });
       } else {
         if (window.scrollY === 0) {
-          // Original hack for scrollable pages at the top
           window.scrollTo(0, 1);
         }
         performOpening();
       }
     } else {
+      // When closing, listen for the animation to end before running the callback.
+      headerElement.addEventListener('transitionend', onTransitionEnd, { once: true });
       document.body.classList.remove('body-no-scroll');
       headerElement.classList.add('max-h-20');
       headerElement.classList.remove('max-h-screen');
+      // Correctly toggle icons
       openIcon.classList.remove('hidden');
       closeIcon.classList.add('hidden');
       hamburgerButton.setAttribute('aria-expanded', 'false');
-
-      // --- The timeout that reset the style is now removed ---
     }
   };
 
+  // --- Hamburger Button Click ---
   hamburgerButton.addEventListener('click', () => {
     const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
     toggleMenu(!isExpanded);
   });
 
-  // --- Animate menu closed before navigating ---
-  mobileMenuLinks.forEach(link => {
-    link.addEventListener('click', (event) => {
-      event.preventDefault(); // Stop the browser from navigating immediately
-      const destination = link.href;
-      toggleMenu(false); // Start the closing animation
-      
-      // Wait for the animation to finish, then navigate
-      setTimeout(() => {
-        window.location.href = destination;
-      }, 300);
-    });
-  });
-
-  // --- Sticky Header Style Script ---
+  // --- Sticky Header Styling ---
   if (headerSection) {
     headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md', 'sticky', 'top-0', 'z-30');
   }
+
+  // --- Unified Navigation Handler for All Header Links ---
+  const allHeaderLinks = document.querySelectorAll('header a');
+  allHeaderLinks.forEach(link => {
+    link.addEventListener('click', (event) => {
+      const isMobileMenuOpen = hamburgerButton.getAttribute('aria-expanded') === 'true';
+      const destination = link.href;
+      const isProductsLinkOnHomepage = link.getAttribute('href').endsWith('/#products') && window.location.pathname === '/';
+
+      if (isProductsLinkOnHomepage) {
+        event.preventDefault();
+        const performScroll = () => {
+          const target = document.querySelector('#products');
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        if (isMobileMenuOpen) {
+          toggleMenu(false, performScroll);
+        } else {
+          performScroll(); // Desktop smooth scroll
+        }
+      } else if (isMobileMenuOpen) {
+        // This now correctly handles the site logo and all other mobile menu links.
+        event.preventDefault();
+        const navigate = () => { window.location.href = destination; };
+        toggleMenu(false, navigate);
+      }
+      // If none of the above, it's a normal desktop link click, so do nothing and let it navigate.
+    });
+  });
 });
 </script>
 
