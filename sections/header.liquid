@@ -1,47 +1,87 @@
-<header class="relative">
+<header class="bg-brand-bg/80 backdrop-blur-md sticky top-0 z-30">
   <div class="max-w-5xl mx-auto px-4">
-    <div class="flex items-center justify-between h-20">
-      <div class="shrink-0 mr-4">
+    <div class="relative flex items-center justify-between h-20">
+
+      <div class="flex items-center">
+        <div class="md:hidden">
+          <button id="hamburger-button" class="p-2 -ml-2" aria-label="Open menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+          </button>
+        </div>
+
+        <nav class="hidden md:flex md:grow">
+          <ul class="flex grow flex-wrap items-center">
+            <li><a href="/#products" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Products</a></li>
+            <li><a href="/blogs/tutorials" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Tutorials</a></li>
+            <li><a href="/pages/about" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">About</a></li>
+            <li><a href="/pages/contact" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 md:flex-1 md:order-first">
         <a href="/" class="flex items-center gap-2">
           <img src="{{ 'camphora-logo.svg' | asset_url }}" alt="Camphora Studio Logo" class="w-8 h-8">
           <span class="text-xl font-bold text-brand-text">Camphora Studio</span>
         </a>
       </div>
 
-      <nav class="hidden md:flex md:grow">
-        <ul class="flex grow justify-end flex-wrap items-center">
-          <li><a href="/#products" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Products</a></li>
-          <li><a href="/about" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">About</a></li>
-          <li><a href="/contact" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Contact</a></li>
-        </ul>
-      </nav>
-
-      <div class="flex items-center gap-2">
+      <div class="flex items-center ml-4">
         <button type="button" id="open-cart-button" class="relative block w-6 h-6">
           {% render 'icon-cart' %}
           <span id="cart-item-count" class="absolute -top-2 -right-3 bg-brand-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center {% if cart.item_count == 0 %}hidden{% endif %}">
             {{ cart.item_count }}
           </span>
         </button>
-        <div class="md:hidden">
-          <button id="hamburger-button" class="p-2" aria-label="Open menu">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-            </svg>
-          </button>
-        </div>
       </div>
+
     </div>
   </div>
 
-  <div id="mobile-menu" class="md:hidden hidden absolute top-full right-4 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+  <div id="mobile-menu" class="md:hidden hidden absolute top-full left-4 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
     <ul class="px-2 py-2">
       <li><a href="/#products" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">Products</a></li>
-      <li><a href="/about" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">About</a></li>
-      <li><a href="/contact" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">Contact</a></li>
+      <li><a href="/blogs/tutorials" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">Tutorials</a></li>
+      <li><a href="/pages/about" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">About</a></li>
+      <li><a href="/pages/contact" class="block text-left font-semibold text-gray-700 hover:text-brand-text hover:bg-gray-100 rounded-md px-3 py-2">Contact</a></li>
     </ul>
   </div>
 </header>
+
+{% comment %} ----- JAVASCRIPTS ----- {% endcomment %}
+<script>
+  // --- Sticky Header Style Script ---
+  document.addEventListener('DOMContentLoaded', function() {
+    const headerSection = document.getElementById('shopify-section-header');
+    if (headerSection) {
+      headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md', 'sticky', 'top-0', 'z-30');
+    }
+  });
+
+  // --- Mobile Menu Script ---
+  document.addEventListener('DOMContentLoaded', () => {
+    const hamburgerButton = document.getElementById('hamburger-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    if (hamburgerButton && mobileMenu) {
+      hamburgerButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+
+    // Close mobile menu if clicking outside of it
+    document.addEventListener('click', (event) => {
+      const isClickInsideMenu = mobileMenu && mobileMenu.contains(event.target);
+      const isClickOnHamburger = hamburgerButton && hamburgerButton.contains(event.target);
+
+      if (!isClickInsideMenu && !isClickOnHamburger) {
+        mobileMenu?.classList.add('hidden');
+      }
+    });
+  });
+</script>
 
 {% schema %}
 {

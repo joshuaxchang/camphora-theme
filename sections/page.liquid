@@ -1,17 +1,12 @@
-{% comment %}
-  This section is used in the page template to render store pages like About us
-  or Contact us.
-
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/page
-{% endcomment %}
-
-<h1>{{ page.title }}</h1>
-
-{{ page.content }}
-
+<main class="max-w-4xl mx-auto px-4 py-12">
+  <article class="prose prose-xl max-w-none">
+    <h1 class="font-heading text-4xl font-bold mb-4 text-brand-text">{{ page.title }}</h1>
+    {{ page.content }}
+  </article>
+</main>
 {% schema %}
 {
-  "name": "t:general.page",
+  "name": "Page",
   "settings": []
 }
 {% endschema %}
