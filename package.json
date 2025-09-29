@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build:css": "tailwindcss -i ./assets/application.css -o ./assets/application.min.css --minify",
-    "dev": "concurrently \"npm run build:css -- --watch\" \"shopify theme dev\""
+    "dev": "concurrently \"npm run build:css -- --watch\" \"shopify theme dev\"",
+    "deploy": "npm run build:css && shopify theme push"
   }
 }
