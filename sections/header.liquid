@@ -3,12 +3,14 @@
     <div class="relative flex items-center justify-between h-20">
 
       <div class="flex items-center">
-        <div class="md-hidden">
-          <button id="hamburger-button" class="p-2 -ml-2" aria-label="Open menu" aria-expanded="false">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path id="hamburger-icon-open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h12"></path>
-              <path id="hamburger-icon-close" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        <div class="md:hidden">
+          <button id="hamburger-button" class="relative w-10 h-10 -ml-2" aria-label="Open menu" aria-expanded="false">
+            <!-- Hamburger Icon -->
+            <svg id="hamburger-icon-open" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h12"></path>
             </svg>
+            <!-- Close Icon -->
+            <span id="hamburger-icon-close" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden text-4xl font-semibold leading-none text-gray-700">&times;</span>
           </button>
         </div>
 
@@ -64,30 +66,67 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Mobile Menu Drawer Elements ---
   const hamburgerButton = document.getElementById('hamburger-button');
   const headerElement = hamburgerButton.closest('header');
+  const headerSection = document.getElementById('shopify-section-header');
+  const mainElement = document.querySelector('main'); // Use querySelector for robustness
+  const footerSection = document.getElementById('shopify-section-footer');
   const openIcon = document.getElementById('hamburger-icon-open');
   const closeIcon = document.getElementById('hamburger-icon-close');
+  const mobileMenuLinks = document.querySelectorAll('#mobile-menu-content a');
+
+  let hackApplied = false; // --- New flag to track if the hack is active ---
 
   const toggleMenu = (isOpen) => {
     if (isOpen) {
-      // If at the very top, scroll down 1px to prevent layout shift
-      if (window.scrollY === 0) {
-        window.scrollTo(0, 1);
+      const isScrollable = document.documentElement.scrollHeight > window.innerHeight;
+
+      const performOpening = () => {
+        document.body.classList.add('body-no-scroll');
+        headerElement.classList.add('max-h-screen');
+        headerElement.classList.remove('max-h-20');
+        openIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+        hamburgerButton.setAttribute('aria-expanded', 'true');
+      };
+
+      if (!isScrollable && mainElement && footerSection) {
+        // Only apply the hack if it hasn't been applied already
+        if (!hackApplied) {
+          const headerHeight = headerSection ? headerSection.offsetHeight : 0;
+          const mainHeight = mainElement.offsetHeight;
+          const footerHeight = footerSection.offsetHeight;
+          
+
+          const totalContentHeight = headerHeight + mainHeight + footerHeight;
+          const viewportHeight = window.innerHeight;
+
+          if (totalContentHeight <= viewportHeight) {
+            const neededHeight = (viewportHeight - totalContentHeight) + 1;
+            const newFooterMinHeight = footerHeight + neededHeight;
+            footerSection.style.minHeight = `${newFooterMinHeight}px`;
+            hackApplied = true; // --- Set the flag ---
+          }
+        }
+        
+        requestAnimationFrame(() => {
+          window.scrollTo(0, 1);
+          performOpening();
+        });
+      } else {
+        if (window.scrollY === 0) {
+          // Original hack for scrollable pages at the top
+          window.scrollTo(0, 1);
+        }
+        performOpening();
       }
-      document.body.classList.add('body-no-scroll');
-      headerElement.classList.add('max-h-screen');
-      headerElement.classList.remove('max-h-20');
-      // Toggle icon
-      openIcon.classList.add('hidden');
-      closeIcon.classList.remove('hidden');
-      hamburgerButton.setAttribute('aria-expanded', 'true');
     } else {
       document.body.classList.remove('body-no-scroll');
       headerElement.classList.add('max-h-20');
       headerElement.classList.remove('max-h-screen');
-      // Toggle icon
       openIcon.classList.remove('hidden');
       closeIcon.classList.add('hidden');
       hamburgerButton.setAttribute('aria-expanded', 'false');
+
+      // --- The timeout that reset the style is now removed ---
     }
   };
 
@@ -96,8 +135,21 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleMenu(!isExpanded);
   });
 
+  // --- Animate menu closed before navigating ---
+  mobileMenuLinks.forEach(link => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault(); // Stop the browser from navigating immediately
+      const destination = link.href;
+      toggleMenu(false); // Start the closing animation
+      
+      // Wait for the animation to finish, then navigate
+      setTimeout(() => {
+        window.location.href = destination;
+      }, 300);
+    });
+  });
+
   // --- Sticky Header Style Script ---
-  const headerSection = document.getElementById('shopify-section-header');
   if (headerSection) {
     headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md', 'sticky', 'top-0', 'z-30');
   }
