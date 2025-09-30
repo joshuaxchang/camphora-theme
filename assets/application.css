@@ -114,13 +114,6 @@ input[type=number] {
   scroll-margin-top: 7.5rem;
 }
 
-/* Judge.me Button Style Override */
-.jdgm-rev-widg__header .jdgm-write-rev-link, 
-.jdgm-rev-widg__header .jdgm-rev-widg__btn-write-review {
-  border-radius: 0.5rem !important; /* Matches your rounded-lg class */
-  overflow: hidden; /* Ensures the background respects the new radius */
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

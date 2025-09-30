@@ -63,8 +63,8 @@
             <p id="product-price" class="text-3xl font-light text-brand-primary">
               {{ product.selected_or_first_available_variant.price | money_without_trailing_zeros }}
             </p>
-            <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
-              {% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', jm_style: '', concierge_install: false, product: product %}
+            <div class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}'>
+              {{ product.metafields.judgeme.badge }}
             </div>
           </div>
 
@@ -133,6 +133,16 @@
         {{ product.description }}
       </div>
     </div>
+  </div>
+</div>
+
+{% comment %}
+  Hardcoded Judge.me Review Widget
+{% endcomment %}
+<div class="max-w-5xl mx-auto px-4 py-8 md:py-16">
+  <div style='clear:both'></div>
+  <div id='judgeme_product_reviews' class='jdgm-widget jdgm-review-widget' data-product-title='{{ product.title | escape }}' data-id='{{ product.id }}' data-auto-install='false'>
+    {{ product.metafields.judgeme.widget }}
   </div>
 </div>
 
