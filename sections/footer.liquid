@@ -1,7 +1,7 @@
 <footer class="bg-brand-bg border-t border-gray-200">
   <div class="max-w-5xl mx-auto py-12 px-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
-      
+
       {% comment %} Left Column: Links (No Heading) {% endcomment %}
       <div>
         <ul class="space-y-2">
@@ -40,7 +40,7 @@
                 required
               >
             </div>
-            <button id="newsletter-button-{{ section.id }}" type="submit" class="h-[50px] w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg shadow-neutral-900/20 transition-all duration-300 transform md:hover:shadow-xl md:hover:-translate-y-1 disabled:opacity-70 disabled:transform-none disabled:shadow-lg flex items-center justify-center">
+            <button id="newsletter-button-{{ section.id }}" type="submit" class="h-[50px] w-full bg-transparent border border-brand-primary text-brand-primary font-bold py-3 px-4 rounded-lg shadow-lg shadow-neutral-900/20 transition-all duration-300 transform md:hover:shadow-xl md:hover:-translate-y-1 disabled:opacity-70 disabled:transform-none disabled:shadow-lg flex items-center justify-center">
               <span class="button-content-wrapper">
                 <span class="button-text">{{ section.settings.newsletter_button_text }}</span>
               </span>
@@ -80,15 +80,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const resetToOriginalState = () => {
     newsletterButton.disabled = false;
-    newsletterButton.classList.remove('bg-brand-primary', 'hover:bg-brand-primary', 'transform-none', 'animate-pulse-once');
-    newsletterButton.classList.add('bg-brand-primary', 'md:hover:-translate-y-1', 'disabled:opacity-70'); // <-- Add opacity back
+    newsletterButton.classList.remove('bg-brand-primary', 'text-white', 'transform-none', 'animate-pulse-once');
+    newsletterButton.classList.add('bg-transparent', 'text-brand-primary', 'md:hover:-translate-y-1', 'disabled:opacity-70');
     buttonContentWrapper.innerHTML = originalButtonHTML;
   };
 
   const handleSuccess = (isFromRedirect = false) => {
     newsletterButton.disabled = true;
-    newsletterButton.classList.add('bg-brand-primary', 'hover:bg-brand-primary', 'transform-none');
-    newsletterButton.classList.remove('md:hover:-translate-y-1', 'disabled:opacity-70'); // <-- Remove opacity for success
+    newsletterButton.classList.add('bg-brand-primary', 'text-white', 'transform-none');
+    newsletterButton.classList.remove('bg-transparent', 'text-brand-primary', 'md:hover:-translate-y-1', 'disabled:opacity-70');
     buttonContentWrapper.innerHTML = '<span>✓ Subscribed!</span>';
     emailInput.value = '';
 
@@ -98,10 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setTimeout(() => {
       resetToOriginalState();
-    }, 4000);
+    }, 3000);
   };
 
-  // ... rest of the script (no changes needed below this line) ...
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('customer_posted') && window.location.hash === '#ContactFooter') {
     handleSuccess(true); 
@@ -112,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     newsletterButton.disabled = true;
     buttonContentWrapper.innerHTML = spinnerIcon;
-    newsletterButton.classList.remove('md:hover:-translate-y-1');
+    newsletterButton.classList.remove('md:hover:-translate-y-1', 'md:hover:bg-brand-primary', 'md:hover:text-white');
 
     const formData = new FormData(form);
 
