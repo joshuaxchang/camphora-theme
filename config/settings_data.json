@@ -13,9 +13,7 @@
       "header": {
         "type": "header",
         "settings": {
-          "main_menu": "main-menu",
-          "mobile_bottom_menu": "mobile-bottom"
-        }
+          "main_menu": "main-menu"        }
       },
       "footer": {
         "type": "footer",

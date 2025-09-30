@@ -1,4 +1,7 @@
-<header class="relative md:h-20 max-h-20 md:max-h-20 overflow-hidden transition-[max-height] duration-300 ease-in-out">
+{% comment %} 
+  The header bar remains a consistent height.
+{% endcomment %}
+<header class="relative md:h-20 max-h-20 md:max-h-20 z-30">
   <div class="max-w-5xl mx-auto px-2 sm:px-4">
     <div class="relative flex items-center justify-between h-20">
 
@@ -38,91 +41,64 @@
       </div>
     </div>
   </div>
-
-  <div id="mobile-menu-content" class="h-[calc(100vh-5rem)] flex flex-col justify-between md:hidden">
-    <div class="p-4">
-      <ul class="space-y-4 text-center">
-        {%- for link in linklists[section.settings.main_menu].links -%}
-          <li><a href="{{ link.url }}" class="block py-2 text-xl font-semibold text-brand-text-sub hover:text-brand-primary">{{ link.title }}</a></li>
-        {%- endfor -%}
-      </ul>
-    </div>
-    <div class="p-4 border-t border-white/10">
-      <ul class="space-y-2 text-center">
-        {%- for link in linklists[section.settings.mobile_bottom_menu].links -%}
-          <li><a href="{{ link.url }}" class="block py-1 text-sm text-gray-600 hover:text-brand-text-sub">{{ link.title }}</a></li>
-        {%- endfor -%}
-      </ul>
-    </div>
-  </div>
 </header>
+
+{% comment %} 
+  This is the new partial-screen overlay for the mobile menu.
+  It's positioned fixed to sit just below the header.
+{% endcomment %}
+<div id="mobile-menu-overlay" class="md:hidden fixed top-0 left-0 right-0 z-20 bg-brand-bg/80 backdrop-blur-md hidden">
+  <div id="mobile-menu-content" class="pt-20 pb-4">
+    <ul class="space-y-2 text-center">
+      {%- for link in linklists[section.settings.main_menu].links -%}
+        <li><a href="{{ link.url }}" class="block py-2 text-xl font-semibold text-brand-text-sub hover:text-brand-primary">{{ link.title }}</a></li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   // --- Element Definitions ---
   const hamburgerButton = document.getElementById('hamburger-button');
-  const headerElement = hamburgerButton.closest('header');
   const headerSection = document.getElementById('shopify-section-header');
-  const mainElement = document.querySelector('main');
-  const footerSection = document.getElementById('shopify-section-footer');
+  const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
   const openIcon = document.getElementById('hamburger-icon-open');
   const closeIcon = document.getElementById('hamburger-icon-close');
+  
+  // --- Sticky Header Styling ---
+  if (headerSection) {
+    // Note: The z-index of the header (z-30) must be higher than the overlay (z-20).
+    headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md', 'sticky', 'top-0', 'z-30', 'transition-colors', 'duration-200');
+  }
 
-  // A flag to ensure the "short page" height adjustment only runs once.
-  let hackApplied = false;
-
-  // --- Master Menu Toggle Function (with Callback) ---
-  const toggleMenu = (isOpen, callback) => {
-    const onTransitionEnd = () => {
-      if (typeof callback === 'function') {
-        callback();
-      }
-      headerElement.removeEventListener('transitionend', onTransitionEnd);
-    };
-
-    if (isOpen) {
-      const isScrollable = document.documentElement.scrollHeight > window.innerHeight;
-      const performOpening = () => {
-        document.body.classList.add('body-no-scroll');
-        headerElement.classList.add('max-h-screen');
-        headerElement.classList.remove('max-h-20');
-        // Correctly toggle icons
-        openIcon.classList.add('hidden');
-        closeIcon.classList.remove('hidden');
-        hamburgerButton.setAttribute('aria-expanded', 'true');
-      };
-
-      // This logic handles visual glitches on pages with very little content.
-      if (!isScrollable && mainElement && footerSection) {
-        if (!hackApplied) {
-          const headerHeight = headerSection ? headerSection.offsetHeight : 0;
-          const mainHeight = mainElement.offsetHeight;
-          const footerHeight = footerSection.offsetHeight;
-          const totalContentHeight = headerHeight + mainHeight + footerHeight;
-          const viewportHeight = window.innerHeight;
-          if (totalContentHeight <= viewportHeight) {
-            const neededHeight = (viewportHeight - totalContentHeight) + 1;
-            const newFooterMinHeight = footerHeight + neededHeight;
-            footerSection.style.minHeight = `${newFooterMinHeight}px`;
-            hackApplied = true;
-          }
-        }
-        requestAnimationFrame(() => {
-          window.scrollTo(0, 1);
-          performOpening();
-        });
-      } else {
-        if (window.scrollY === 0) {
-          window.scrollTo(0, 1);
-        }
-        performOpening();
-      }
+  // --- Master Menu Toggle Function ---
+  const toggleMenu = (open) => {
+    if (open) {
+      document.body.classList.add('body-no-scroll');
+      
+      // Make header transparent to avoid "double blur" effect with the overlay.
+      headerSection.classList.remove('bg-brand-bg/80', 'backdrop-blur-md');
+      headerSection.classList.add('bg-transparent');
+      
+      // Instantly show the overlay.
+      mobileMenuOverlay.classList.remove('hidden');
+      
+      openIcon.classList.add('hidden');
+      closeIcon.classList.remove('hidden');
+      hamburgerButton.setAttribute('aria-expanded', 'true');
+      
     } else {
-      // When closing, listen for the animation to end before running the callback.
-      headerElement.addEventListener('transitionend', onTransitionEnd, { once: true });
       document.body.classList.remove('body-no-scroll');
-      headerElement.classList.add('max-h-20');
-      headerElement.classList.remove('max-h-screen');
+      
+      // Give the glass effect back to the header.
+      headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md');
+      headerSection.classList.remove('bg-transparent');
+
+      // Instantly hide the overlay.
+      mobileMenuOverlay.classList.add('hidden');
+      
       openIcon.classList.remove('hidden');
       closeIcon.classList.add('hidden');
       hamburgerButton.setAttribute('aria-expanded', 'false');
@@ -135,36 +111,32 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleMenu(!isExpanded);
   });
 
-  // --- Sticky Header Styling ---
-  if (headerSection) {
-    headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md', 'sticky', 'top-0', 'z-30');
-  }
-
-  // --- Unified Navigation Handler for All Header Links ---
-  const allHeaderLinks = document.querySelectorAll('header a');
-  allHeaderLinks.forEach(link => {
+  // --- Unified Navigation Handler for All Header & Menu Links ---
+  // The selector now includes links in the new overlay.
+  const allNavLinks = document.querySelectorAll('header a, #mobile-menu-overlay a');
+  allNavLinks.forEach(link => {
     link.addEventListener('click', (event) => {
       const isMobileMenuOpen = hamburgerButton.getAttribute('aria-expanded') === 'true';
-      const destination = link.href;
+      
+      // If the mobile menu is open, we always want to close it before navigating.
+      if (isMobileMenuOpen) {
+        // We don't need a callback or transitionend listener for instant toggles.
+        toggleMenu(false);
+      }
+      
+      // The rest of the logic can proceed as normal after the menu is closed.
+      // NOTE: For instant navigation, we don't preventDefault unless we're smooth scrolling.
       const isProductsLinkOnHomepage = link.getAttribute('href').endsWith('/#products') && window.location.pathname === '/';
       if (isProductsLinkOnHomepage) {
         event.preventDefault();
-        const performScroll = () => {
-          const target = document.querySelector('#products');
-          if (target) target.scrollIntoView({ behavior: 'smooth' });
-        };
-        if (isMobileMenuOpen) {
-          toggleMenu(false, performScroll);
-        } else {
-          performScroll(); // Desktop smooth scroll
+        const target = document.querySelector('#products');
+        if (target) {
+            // A short timeout can help ensure the scroll happens after the menu is visually gone.
+            setTimeout(() => {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }, 50);
         }
-      } else if (isMobileMenuOpen) {
-        // This now correctly handles the site logo and all other mobile menu links.
-        event.preventDefault();
-        const navigate = () => { window.location.href = destination; };
-        toggleMenu(false, navigate);
       }
-      // If none of the above, it's a normal desktop link click, so do nothing and let it navigate.
     });
   });
 });
@@ -180,13 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
       "label": "Main Menu",
       "default": "main-menu",
       "info": "Controls the main navigation links in the header for both desktop and mobile."
-    },
-    {
-      "type": "link_list",
-      "id": "mobile_bottom_menu",
-      "label": "Mobile Menu Bottom Links",
-      "info": "Used for secondary links at the bottom of the mobile menu drawer (e.g., policies)."
     }
   ]
 }
 {% endschema %}
+
