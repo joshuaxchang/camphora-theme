@@ -31,7 +31,7 @@
                 type="email"
                 name="contact[email]"
                 id="NewsletterForm--{{ section.id }}"
-                class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary p-3"
+                class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary p-3"
                 placeholder="Enter your email"
                 aria-label="Enter your email"
                 autocorrect="off"
@@ -40,8 +40,10 @@
                 required
               >
             </div>
-            <button id="newsletter-button" type="submit" class="w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg shadow-neutral-900/20 transition-all duration-300 transform md:hover:shadow-xl md:hover:-translate-y-1 disabled:opacity-70 disabled:transform-none disabled:shadow-lg">
-              <span id="newsletter-button-text">{{ section.settings.newsletter_button_text }}</span>
+            <button id="newsletter-button-{{ section.id }}" type="submit" class="h-[50px] w-full bg-brand-primary text-white font-bold py-3 px-4 rounded-lg shadow-lg shadow-neutral-900/20 transition-all duration-300 transform md:hover:shadow-xl md:hover:-translate-y-1 disabled:opacity-70 disabled:transform-none disabled:shadow-lg flex items-center justify-center">
+              <span class="button-content-wrapper">
+                <span class="button-text">{{ section.settings.newsletter_button_text }}</span>
+              </span>
             </button>
           {%- endform -%}
         {%- endif -%}
@@ -61,59 +63,74 @@
         </div>
       {%- endif -%}
     </div>
-
   </div>
 </footer>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const contactForm = document.getElementById('ContactFooter');
-  if (!contactForm) return;
+  const form = document.getElementById('ContactFooter');
+  if (!form) return;
 
-  const newsletterButton = document.getElementById('newsletter-button');
-  const newsletterButtonText = document.getElementById('newsletter-button-text');
-  const emailInput = contactForm.querySelector('input[type="email"]');
-  const originalButtonText = newsletterButtonText.textContent;
+  const newsletterButton = document.getElementById('newsletter-button-{{ section.id }}');
+  const buttonContentWrapper = newsletterButton.querySelector('.button-content-wrapper');
+  const emailInput = form.querySelector('input[type="email"]');
+  const originalButtonHTML = buttonContentWrapper.innerHTML;
+  
   const spinnerIcon = `<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
-  contactForm.addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent default to handle the response
+  const resetToOriginalState = () => {
+    newsletterButton.disabled = false;
+    newsletterButton.classList.remove('bg-brand-primary', 'hover:bg-brand-primary', 'transform-none', 'animate-pulse-once');
+    newsletterButton.classList.add('bg-brand-primary', 'md:hover:-translate-y-1', 'disabled:opacity-70'); // <-- Add opacity back
+    buttonContentWrapper.innerHTML = originalButtonHTML;
+  };
+
+  const handleSuccess = (isFromRedirect = false) => {
+    newsletterButton.disabled = true;
+    newsletterButton.classList.add('bg-brand-primary', 'hover:bg-brand-primary', 'transform-none');
+    newsletterButton.classList.remove('md:hover:-translate-y-1', 'disabled:opacity-70'); // <-- Remove opacity for success
+    buttonContentWrapper.innerHTML = '<span>✓ Subscribed!</span>';
+    emailInput.value = '';
+
+    if (isFromRedirect) {
+      newsletterButton.classList.add('animate-pulse-once');
+    }
+
+    setTimeout(() => {
+      resetToOriginalState();
+    }, 4000);
+  };
+
+  // ... rest of the script (no changes needed below this line) ...
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('customer_posted') && window.location.hash === '#ContactFooter') {
+    handleSuccess(true); 
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
     
     newsletterButton.disabled = true;
-    newsletterButtonText.innerHTML = `<div class="flex justify-center items-center">${spinnerIcon}</div>`;
+    buttonContentWrapper.innerHTML = spinnerIcon;
+    newsletterButton.classList.remove('md:hover:-translate-y-1');
 
-    const formData = new FormData(contactForm);
+    const formData = new FormData(form);
 
     fetch('/contact', {
       method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept': 'application/javascript'
-      },
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
       body: formData
     })
     .then(response => {
-      if (response.ok && !response.redirected) {
-        // This is a true success (e.g., a 200 OK response without a redirect).
-        newsletterButtonText.textContent = '✓ Subscribed!';
-        emailInput.value = '';
-      } else if (response.redirected) {
-        // This is a CAPTCHA. The browser will handle the redirect automatically.
-        // We do nothing and let the user be taken to the CAPTCHA page.
-        // The button will stay in its loading state until the page unloads.
+      if (response.ok) {
+        handleSuccess();
       } else {
-        // This is a validation error (e.g., invalid email) or other server error.
-        throw new Error('Form submission failed.');
+        form.submit();
       }
     })
     .catch(error => {
-      console.error('Newsletter Error:', error);
-      newsletterButtonText.textContent = 'Error!';
-      // Re-enable the button so the user can try again.
-      setTimeout(() => {
-        newsletterButton.disabled = false;
-        newsletterButtonText.textContent = originalButtonText;
-      }, 3000);
+      console.warn('Fetch failed, falling back to standard submission:', error);
+      form.submit();
     });
   });
 });

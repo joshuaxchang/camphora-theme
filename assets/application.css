@@ -61,6 +61,55 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
+/* --- Custom Captcha and Footer Styles --- */
+
+/* Hide the footer on the challenge page */
+.is-challenge-page #shopify-section-footer {
+  display: none !important;
+}
+
+/* Style the submit button on the challenge page */
+.shopify-challenge__button {
+  background-color: theme('colors.brand-primary') !important;
+  color: theme('colors.white') !important;
+  font-weight: bold !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  /* Add transition for smooth effects */
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  /* Use your theme's 'card' shadow */
+  box-shadow: theme('boxShadow.card') !important;
+}
+
+/* Add the float effect on hover with your larger 'card-hover' shadow */
+.shopify-challenge__button:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: theme('boxShadow.card-hover') !important;
+}
+
+/* Remove the float effect when the button is being pressed */
+.shopify-challenge__button:active {
+  transform: translateY(0) !important;
+  /* Revert to the smaller shadow on click */
+  box-shadow: theme('boxShadow.card') !important;
+}
+
+/* --- Custom Animation for Success State --- */
+@keyframes pulse-once {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-once {
+  animation: pulse-once 0.8s ease-in-out;
+}
+
 [id] {
   scroll-margin-top: 5rem;
 }

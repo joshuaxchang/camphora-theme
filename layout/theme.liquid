@@ -10,26 +10,32 @@
     {{ 'application.min.css' | asset_url | stylesheet_tag }}
 </head>
 <body class="font-sans antialiased text-gray-800 bg-brand-bg">
-    {% section 'header' %}
+  {% section 'header' %}
 
-    <main>
-        {{ content_for_layout }}
-    </main>
+  <main>
+      {{ content_for_layout }}
+  </main>
 
-    {% section 'footer' %}
-    <div id="cart-drawer-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 invisible opacity-0 transition-opacity duration-300"></div>    
-    {% section 'cart-drawer' %}
+  {% section 'footer' %}
+  <div id="cart-drawer-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 invisible opacity-0 transition-opacity duration-300"></div>    
+  {% section 'cart-drawer' %}
 
-    {% comment %} Our custom, dependency-free zoom overlay for product page {% endcomment %}
-    <div id="zoom-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
-      <div id="zoom-content" class="h-full w-full max-w-4xl overflow-y-auto space-y-4 py-8 scroll-smooth">
-        {% comment %} The zoomed image will be inserted here by JavaScript {% endcomment %}
-      </div>
-      <button id="zoom-close" class="absolute top-4 right-4 text-white w-10 h-10">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+  {% comment %} Our custom, dependency-free zoom overlay for product page {% endcomment %}
+  <div id="zoom-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+    <div id="zoom-content" class="h-full w-full max-w-4xl overflow-y-auto space-y-4 py-8 scroll-smooth">
+      {% comment %} The zoomed image will be inserted here by JavaScript {% endcomment %}
     </div>
+    <button id="zoom-close" class="absolute top-4 right-4 text-white w-10 h-10">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  <script>
+    // Add a class to the body if on the challenge page
+    if (window.location.pathname.includes('/challenge')) {
+      document.body.classList.add('is-challenge-page');
+    }
+  </script>
 </body>
 </html>

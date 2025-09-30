@@ -6,34 +6,35 @@
     </div>
   {%- endif -%}
 
-  {%- form 'contact', id: 'contact-form' -%}
-    {%- if form.posted_successfully? -%}
-      <p class="mb-4 text-center text-brand-primary">Thanks for contacting us! We'll get back to you shortly.</p>
-    {%- endif -%}
+  {%- form 'contact', id: 'contact-page-form' -%}
 
+    <div id="contact-form-success-message" class="hidden mb-6 p-4 bg-green-100 border border-green-200 text-green-800 rounded-lg text-center"></div>
+    
     {{ form.errors | default_errors }}
 
-    <div class="space-y-6">
+    <div id="contact-form-fields" class="space-y-6">
       <div>
         <label for="ContactFormName" class="block text-base font-medium text-brand-text mb-2">Name</label>
         <input type="text" id="ContactFormName" name="contact[name]"
-               class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary p-3">
+               class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary p-3">
       </div>
       <div>
         <label for="ContactFormEmail" class="block text-base font-medium text-brand-text mb-2">Email</label>
         <input type="email" id="ContactFormEmail" name="contact[email]"
-               class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary p-3">
+               class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary p-3">
       </div>
       <div>
         <label for="ContactFormMessage" class="block text-base font-medium text-brand-text mb-2">Message</label>
         <textarea id="ContactFormMessage" name="contact[body]" rows="8"
-                  class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary p-3 resize-y"></textarea>
+                  class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary p-3 resize-y"></textarea>
       </div>
       <div class="text-center pt-4">
         <button type="submit"
                 id="contact-form-submit-button"
-                class="bg-brand-primary text-white font-bold rounded-lg shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transform hover:-translate-y-1 transition-all duration-300 w-48 h-12 flex items-center justify-center mx-auto disabled:opacity-70 disabled:transform-none disabled:shadow-lg">
-          <span>Send Message</span>
+                class="bg-brand-primary text-white font-bold rounded-lg shadow-lg shadow-neutral-900/20 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 w-48 h-12 flex items-center justify-center mx-auto disabled:opacity-70 disabled:transform-none disabled:shadow-lg">
+          <span class="button-content-wrapper">
+            <span>Send Message</span>
+          </span>
         </button>
       </div>
     </div>
@@ -41,28 +42,77 @@
 </div>
 
 <script>
-  // Script remains the same
-  document.addEventListener('DOMContentLoaded', function () {
-    const contactForm = document.getElementById('contact-form');
-    if (!contactForm) return;
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('contact-page-form');
+  if (!form) return;
 
-    const submitButton = document.getElementById('contact-form-submit-button');
-    const buttonSpan = submitButton.querySelector('span');
-    const originalButtonText = buttonSpan.innerHTML;
-    const spinnerIcon = `<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+  const submitButton = document.getElementById('contact-form-submit-button');
+  const buttonContentWrapper = submitButton.querySelector('.button-content-wrapper');
+  const successMessageContainer = document.getElementById('contact-form-success-message');
+  const originalButtonHTML = buttonContentWrapper.innerHTML;
+  
+  const spinnerIcon = `<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
-    contactForm.addEventListener('submit', function (event) {
-      submitButton.disabled = true;
-      buttonSpan.innerHTML = spinnerIcon;
-    });
+  const resetToOriginalState = () => {
+    submitButton.disabled = false;
+    submitButton.classList.remove('bg-brand-primary', 'hover:bg-brand-primary', 'transform-none', 'animate-pulse-once');
+    submitButton.classList.add('bg-brand-primary', 'hover:-translate-y-1', 'disabled:opacity-70'); // <-- Add opacity back
+    buttonContentWrapper.innerHTML = originalButtonHTML;
+  };
 
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) {
-            submitButton.disabled = false;
-            buttonSpan.innerHTML = originalButtonText;
-        }
+  const handleSuccess = (isFromRedirect = false) => {
+    successMessageContainer.innerHTML = "Thank you! We've received your message and will get back to you shortly.";
+    successMessageContainer.classList.remove('hidden');
+    
+    submitButton.disabled = true;
+    submitButton.classList.add('bg-brand-primary', 'hover:bg-brand-primary', 'transform-none');
+    submitButton.classList.remove('hover:-translate-y-1', 'disabled:opacity-70'); // <-- Remove opacity for success
+    buttonContentWrapper.innerHTML = '<span>✓ Message Sent!</span>';
+    form.reset(); 
+
+    if (isFromRedirect) {
+      submitButton.classList.add('animate-pulse-once');
+    }
+
+    setTimeout(() => {
+      resetToOriginalState();
+    }, 4000);
+  };
+
+  // ... rest of the script (no changes needed below this line) ...
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('customer_posted') && window.location.hash === '#contact_form') {
+    handleSuccess(true);
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    successMessageContainer.classList.add('hidden');
+    
+    submitButton.disabled = true;
+    buttonContentWrapper.innerHTML = spinnerIcon;
+    submitButton.classList.remove('hover:-translate-y-1');
+
+    const formData = new FormData(form);
+
+    fetch('/contact', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        handleSuccess();
+      } else {
+        form.submit();
+      }
+    })
+    .catch(error => {
+      console.warn('Fetch failed, falling back to standard submission:', error);
+      form.submit();
     });
   });
+});
 </script>
 
 {% schema %}
