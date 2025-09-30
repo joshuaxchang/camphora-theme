@@ -14,7 +14,7 @@
 
         <nav class="hidden md:flex md:grow">
           <ul class="flex grow flex-wrap items-center">
-            {%- for link in main_menu.links -%}
+            {%- for link in linklists[section.settings.main_menu].links -%}
               <li><a href="{{ link.url }}" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">{{ link.title }}</a></li>
             {%- endfor -%}
           </ul>
@@ -42,14 +42,14 @@
   <div id="mobile-menu-content" class="h-[calc(100vh-5rem)] flex flex-col justify-between md:hidden">
     <div class="p-4">
       <ul class="space-y-4 text-center">
-        {%- for link in main_menu.links -%}
+        {%- for link in linklists[section.settings.main_menu].links -%}
           <li><a href="{{ link.url }}" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">{{ link.title }}</a></li>
         {%- endfor -%}
       </ul>
     </div>
     <div class="p-4 border-t border-white/10">
       <ul class="space-y-2 text-center">
-        {%- for link in mobile_bottom_menu.links -%}
+        {%- for link in linklists[section.settings.mobile_bottom_menu].links -%}
           <li><a href="{{ link.url }}" class="block py-1 text-sm text-gray-600 hover:text-brand-text">{{ link.title }}</a></li>
         {%- endfor -%}
       </ul>
