@@ -21,7 +21,7 @@
   {% section 'cart-drawer' %}
 
   {% comment %} Our custom, dependency-free zoom overlay for product page {% endcomment %}
-  <div id="zoom-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+  <div id="zoom-overlay" class="fixed inset-0 bg-black backdrop-blur-sm bg-opacity-50 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
     <div id="zoom-content" class="h-full w-full max-w-4xl overflow-y-auto space-y-4 py-8 scroll-smooth">
       {% comment %} The zoomed image will be inserted here by JavaScript {% endcomment %}
     </div>
