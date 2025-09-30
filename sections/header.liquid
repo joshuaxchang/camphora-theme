@@ -5,21 +5,18 @@
       <div class="flex items-center">
         <div class="md:hidden">
           <button id="hamburger-button" class="relative w-10 h-10 -ml-2" aria-label="Open menu" aria-expanded="false">
-            <!-- Hamburger Icon -->
             <svg id="hamburger-icon-open" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h12"></path>
             </svg>
-            <!-- Close Icon -->
             <span id="hamburger-icon-close" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden text-4xl font-semibold leading-none text-gray-700">&times;</span>
           </button>
         </div>
 
         <nav class="hidden md:flex md:grow">
           <ul class="flex grow flex-wrap items-center">
-            <li><a href="/#products" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Products</a></li>
-            <li><a href="/blogs/tutorials" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Tutorials</a></li>
-            <li><a href="/pages/about" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">About</a></li>
-            <li><a href="/pages/contact" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">Contact</a></li>
+            {%- for link in main_menu.links -%}
+              <li><a href="{{ link.url }}" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">{{ link.title }}</a></li>
+            {%- endfor -%}
           </ul>
         </nav>
       </div>
@@ -42,20 +39,19 @@
     </div>
   </div>
 
-  <!-- Mobile Menu Content -->
   <div id="mobile-menu-content" class="h-[calc(100vh-5rem)] flex flex-col justify-between md:hidden">
     <div class="p-4">
       <ul class="space-y-4 text-center">
-        <li><a href="/#products" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">Products</a></li>
-        <li><a href="/blogs/tutorials" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">Tutorials</a></li>
-        <li><a href="/pages/about" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">About</a></li>
-        <li><a href="/pages/contact" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">Contact</a></li>
+        {%- for link in main_menu.links -%}
+          <li><a href="{{ link.url }}" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">{{ link.title }}</a></li>
+        {%- endfor -%}
       </ul>
     </div>
     <div class="p-4 border-t border-white/10">
       <ul class="space-y-2 text-center">
-        <li><a href="/pages/shipping-returns-policy" class="block py-1 text-sm text-gray-600 hover:text-brand-text">Shipping & Returns</a></li>
-        <li><a href="/pages/privacy-policy" class="block py-1 text-sm text-gray-600 hover:text-brand-text">Privacy Policy</a></li>
+        {%- for link in mobile_bottom_menu.links -%}
+          <li><a href="{{ link.url }}" class="block py-1 text-sm text-gray-600 hover:text-brand-text">{{ link.title }}</a></li>
+        {%- endfor -%}
       </ul>
     </div>
   </div>
@@ -127,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('body-no-scroll');
       headerElement.classList.add('max-h-20');
       headerElement.classList.remove('max-h-screen');
-      // Correctly toggle icons
       openIcon.classList.remove('hidden');
       closeIcon.classList.add('hidden');
       hamburgerButton.setAttribute('aria-expanded', 'false');
@@ -152,14 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const isMobileMenuOpen = hamburgerButton.getAttribute('aria-expanded') === 'true';
       const destination = link.href;
       const isProductsLinkOnHomepage = link.getAttribute('href').endsWith('/#products') && window.location.pathname === '/';
-
       if (isProductsLinkOnHomepage) {
         event.preventDefault();
         const performScroll = () => {
           const target = document.querySelector('#products');
           if (target) target.scrollIntoView({ behavior: 'smooth' });
         };
-        
         if (isMobileMenuOpen) {
           toggleMenu(false, performScroll);
         } else {
@@ -179,7 +172,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 {% schema %}
 {
-  "name": "Header"
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Main Menu",
+      "default": "main-menu",
+      "info": "Controls the main navigation links in the header for both desktop and mobile."
+    },
+    {
+      "type": "link_list",
+      "id": "mobile_bottom_menu",
+      "label": "Mobile Menu Bottom Links",
+      "info": "Used for secondary links at the bottom of the mobile menu drawer (e.g., policies)."
+    }
+  ]
 }
 {% endschema %}
-
