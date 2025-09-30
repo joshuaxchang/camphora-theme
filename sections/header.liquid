@@ -4,7 +4,7 @@
 
       <div class="flex items-center">
         <div class="md:hidden">
-          <button id="hamburger-button" class="relative w-10 h-10 -ml-2" aria-label="Open menu" aria-expanded="false">
+          <button id="hamburger-button" class="relative w-10 h-10 -ml-2 ml-2 sm:ml-0" aria-label="Open menu" aria-expanded="false">
             <svg id="hamburger-icon-open" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h12"></path>
             </svg>
@@ -28,7 +28,7 @@
         </a>
       </div>
 
-      <div class="flex items-center ml-4">
+      <div class="flex items-center justify-center w-12 mr-2 sm:mr-0">
         <button type="button" id="open-cart-button" class="relative block w-6 h-6">
           {% render 'icon-cart' %}
           <span id="cart-item-count" class="absolute -top-2 -right-3 bg-brand-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center {% if cart.item_count == 0 %}hidden{% endif %}">
@@ -185,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       "type": "link_list",
       "id": "mobile_bottom_menu",
       "label": "Mobile Menu Bottom Links",
+      "default": "mobile-bottom",
       "info": "Used for secondary links at the bottom of the mobile menu drawer (e.g., policies)."
     }
   ]

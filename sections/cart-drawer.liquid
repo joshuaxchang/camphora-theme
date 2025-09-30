@@ -80,7 +80,7 @@
       <p class="text-xs font-light text-gray-500 mb-4">
         Taxes & <a href="/policy#shipping" class="font-medium text-brand-text/80 underline hover:text-brand-primary-hover transition-colors">Shipping</a> calculated at checkout
       </p>
-      <a href="/checkout" id="checkout-button" class="w-full text-center bg-brand-primary text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 block h-12 flex items-center justify-center shadow-lg shadow-neutral-900/20 hover:shadow-xl hover:shadow-neutral-900/30 transform hover:-translate-y-1">
+      <a href="/checkout" id="checkout-button" class="w-full text-center bg-brand-primary text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 block h-12 flex items-center justify-center shadow-lg shadow-neutral-900/20 md:hover:shadow-xl md:hover:shadow-neutral-900/30 transform md:hover:-translate-y-1 disabled:opacity-70 disabled:transform-none disabled:shadow-lg disabled:pointer-events-none">
         <span>Checkout</span>
       </a>
     </div>
@@ -312,21 +312,27 @@
 
       const checkoutButton = event.target.closest('#checkout-button');
       if (checkoutButton) {
-        event.preventDefault(); // Stop the link from navigating immediately
-        const span = checkoutButton.querySelector('span');
+        event.preventDefault(); 
+        
+        // A check to prevent multiple clicks while it's already processing
+        if (checkoutButton.hasAttribute('disabled')) {
+          return;
+        }
 
-        // Apply disabled/loading state
-        checkoutButton.classList.add('opacity-70', 'pointer-events-none');
-        checkoutButton.classList.remove('hover:shadow-xl', 'hover:-translate-y-1');
+        const span = checkoutButton.querySelector('span');
+        
+        // Set the disabled attribute to true
+        checkoutButton.setAttribute('disabled', 'true');
+        
         if (span) {
           span.innerHTML = `<div class="flex justify-center items-center">${spinnerSVG}</div>`;
         }
 
-        // Navigate after a short delay to allow the user to see the feedback
+        // Navigate after a short delay
         setTimeout(() => {
           window.location.href = checkoutButton.href;
         }, 300);
-        return; // Stop further execution
+        return; 
       }
 
       const button = event.target.closest('.quantity-minus, .quantity-plus');
