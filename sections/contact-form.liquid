@@ -6,9 +6,9 @@
     </div>
   {%- endif -%}
 
-  {%- form 'contact', id: 'contact-page-form', action: '#page-title' -%}
+  {%- form 'contact', id: 'ContactForm' -%}
 
-    <div id="contact-form-success-message" class="hidden mb-6 p-4 bg-brand-accent-light border border-brand-primary/20 text-brand-text rounded-lg text-center font-medium"></div>
+    <div id="contact-form-success-message" class="hidden mb-6 p-4 bg-brand-accent-light border border-brand-primary/20 text-brand-primary rounded-lg text-center font-medium"></div>
     
     {{ form.errors | default_errors }}
 
@@ -43,74 +43,44 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const form = document.getElementById('contact-page-form');
+  const form = document.getElementById('ContactForm');
   if (!form) return;
 
   const submitButton = document.getElementById('contact-form-submit-button');
   const buttonContentWrapper = submitButton.querySelector('.button-content-wrapper');
   const successMessageContainer = document.getElementById('contact-form-success-message');
-  const originalButtonHTML = buttonContentWrapper.innerHTML;
+  const pageTitle = document.getElementById('page-title');
   
   const spinnerIcon = `<svg class="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
-  const resetToOriginalState = () => {
-    submitButton.disabled = false;
-    submitButton.classList.remove('bg-brand-primary', 'hover:bg-brand-primary', 'transform-none', 'animate-pulse-once');
-    submitButton.classList.add('bg-brand-primary', 'hover:-translate-y-1', 'disabled:opacity-70');
-    buttonContentWrapper.innerHTML = originalButtonHTML;
-  };
-
-  const handleSuccess = (isFromRedirect = false) => {
-    successMessageContainer.innerHTML = "Thank you! We've received your message and will get back to you shortly.";
-    successMessageContainer.classList.remove('hidden');
-    
-    submitButton.disabled = true;
-    submitButton.classList.add('bg-brand-primary', 'hover:bg-brand-primary', 'transform-none');
-    submitButton.classList.remove('hover:-translate-y-1', 'disabled:opacity-70');
-    buttonContentWrapper.innerHTML = '<span>✓ Message Sent!</span>';
-    form.reset(); 
-
-    if (isFromRedirect) {
-      submitButton.classList.add('animate-pulse-once');
-    }
-
-    setTimeout(() => {
-      resetToOriginalState();
-    }, 4000);
-  };
-
+  // Check for success after returning from a redirect (like a captcha)
   const urlParams = new URLSearchParams(window.location.search);
-  
-  if (urlParams.has('contact_posted') && window.location.hash === '#page-title') {
-    handleSuccess(true);
+  if (urlParams.has('contact_posted')) {
+    successMessageContainer.innerHTML = "Thank you! Your message has been sent.";
+    successMessageContainer.classList.remove('hidden');
+
+    // Scroll to the page title to make sure the message is visible
+    if (pageTitle) {
+      pageTitle.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
+  // On any submission, just show the spinner. The browser will handle the rest.
   form.addEventListener('submit', function (event) {
-    event.preventDefault();
-    successMessageContainer.classList.add('hidden');
-    
     submitButton.disabled = true;
     buttonContentWrapper.innerHTML = spinnerIcon;
     submitButton.classList.remove('hover:-translate-y-1');
+  });
 
-    const formData = new FormData(form);
-
-    fetch('/contact', {
-      method: 'POST',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      body: formData
-    })
-    .then(response => {
-      if (response.ok) {
-        handleSuccess();
-      } else {
-        form.submit();
-      }
-    })
-    .catch(error => {
-      console.warn('Fetch failed, falling back to standard submission:', error);
-      form.submit();
-    });
+  // If the user navigates back to the page (e.g., with the back button),
+  // ensure the button is re-enabled.
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      const originalButtonHTML = '<span>Send Message</span>';
+      submitButton.disabled = false;
+      buttonContentWrapper.innerHTML = originalButtonHTML;
+      submitButton.classList.add('hover:-translate-y-1');
+    }
   });
 });
 </script>
