@@ -412,5 +412,19 @@
         updateQuantity(key, quantity);
       }, 750);
     });
+
+    // --- BFCACHE RESET LOGIC ---
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) {
+        const checkoutButton = document.getElementById('checkout-button');
+        if (checkoutButton) {
+          checkoutButton.removeAttribute('disabled');
+          const span = checkoutButton.querySelector('span');
+          if (span) {
+            span.textContent = 'Checkout';
+          }
+        }
+      }
+    });
   });
 </script>
