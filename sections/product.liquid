@@ -63,8 +63,8 @@
             <p id="product-price" class="text-3xl font-light text-brand-primary">
               {{ product.selected_or_first_available_variant.price | money_without_trailing_zeros }}
             </p>
-            <div class="text-gray-400">
-                ★★★★★ (0 reviews)
+            <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}">
+              {% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', jm_style: '', concierge_install: false, product: product %}
             </div>
           </div>
 
