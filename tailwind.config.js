@@ -33,8 +33,17 @@ module.exports = {
       backdropBlur: {
         'custom': '1.5px',
       },
-      // Typography plugin settings can be added here if needed,
-      // but the plugin itself is now active.
+      // ADD THIS TYPOGRAPHY CONFIGURATION
+      typography: ({ theme }) => ({
+        DEFAULT: {
+          css: {
+            '--tw-prose-headings': theme('colors.brand-text'),
+            '--tw-prose-body': theme('colors.brand-text'),
+            '--tw-prose-links': theme('colors.brand-primary'),
+            // You can also customize other elements like links, body text etc.
+          },
+        },
+      }),
     },
   },
   plugins: [

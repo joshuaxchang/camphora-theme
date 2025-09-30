@@ -61,6 +61,10 @@ input[type=number] {
     -moz-appearance: textfield;
 }
 
+[id] {
+  scroll-margin-top: 5rem;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
