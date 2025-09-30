@@ -13,13 +13,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'brand-bg': '#F7FBFF',
-        'brand-card': '#FFFFFF',
-        'brand-text': '#6D5D4D',
-        'brand-primary': '#4C8562',
+        'brand-bg': '#F0F9FF',          // A clearer, light sky blue
+        'brand-card': '#FFFFFF',          // Clean and simple
+        'brand-text-main': '#4A4036',   // REPLACES 'brand-body' - dark brown from tree trunk
+        'brand-text-sub': '#6D5D4D',    // Your old 'brand-text', good for subheadings
+        'brand-primary': '#4C8562',       // Leaf green, great choice
         'brand-primary-hover': '#3E6B50',
-        'brand-accent': '#c5ad98ff',
-        'brand-accent-light': '#F0F3F5',
+        'brand-accent': '#c5ad98ff',      // Sunlit bark/earth
+        'brand-accent-light': '#F0F3F5', // Neutral borders/dividers
+        'brand-cta': '#F59E0B',          // NEW: Sunlight yellow for call to action
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
@@ -37,8 +39,8 @@ module.exports = {
       typography: ({ theme }) => ({
         DEFAULT: {
           css: {
-            '--tw-prose-headings': theme('colors.brand-text'),
-            '--tw-prose-body': theme('colors.brand-text'),
+            '--tw-prose-headings': theme('colors.brand-text-sub'),
+            '--tw-prose-body': theme('colors.brand-text-main'),
             '--tw-prose-links': theme('colors.brand-primary'),
             // You can also customize other elements like links, body text etc.
           },

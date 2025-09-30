@@ -114,6 +114,11 @@ input[type=number] {
   scroll-margin-top: 7.5rem;
 }
 
+/* Judge.me Star Badge Text Color */
+.jdgm-preview-badge .jdgm-prev-badge__text {
+  color: theme('colors.brand-primary') !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -1,12 +1,12 @@
 <div class="max-w-4xl mx-auto px-4 py-12">
-  <h1 class="font-heading text-4xl font-bold mb-8 text-brand-text">{{ blog.title }}</h1>
+  <h1 class="font-heading text-4xl font-bold mb-8 text-brand-text-sub">{{ blog.title }}</h1>
 
   <div class="space-y-8">
     {%- for article in blog.articles -%}
       <a href="{{ article.url }}" class="block group">
-        <h2 class="font-heading text-3xl font-bold text-brand-text group-hover:underline decoration-2 underline-offset-4">{{ article.title }}</h2>
+        <h2 class="font-heading text-3xl font-bold text-brand-text-sub group-hover:underline decoration-2 underline-offset-4">{{ article.title }}</h2>
         {%- if article.excerpt != blank -%}
-          <p class="mt-2 text-lg text-brand-text/80">{{ article.excerpt }}</p>
+          <p class="mt-2 text-lg text-brand-text-sub/80">{{ article.excerpt }}</p>
         {%- endif -%}
         <span class="mt-4 inline-block font-semibold text-brand-primary">Read more &rarr;</span>
       </a>

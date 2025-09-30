@@ -1,5 +1,5 @@
 <div class="max-w-xl mx-auto py-16 px-4">
-  <h1 id="page-title" class="page-title-anchor font-heading text-4xl font-bold mb-4 text-center text-brand-text">{{ page.title }}</h1>
+  <h1 id="page-title" class="page-title-anchor font-heading text-4xl font-bold mb-4 text-center text-brand-text-sub">{{ page.title }}</h1>
   {%- if page.content != blank -%}
     <div class="prose max-w-none mb-12 text-center">
       {{ page.content }}
@@ -14,17 +14,17 @@
 
     <div id="contact-form-fields" class="space-y-6">
       <div>
-        <label for="ContactFormName" class="block text-base font-medium text-brand-text mb-2">Name</label>
+        <label for="ContactFormName" class="block text-base font-medium text-brand-text-sub mb-2">Name</label>
         <input type="text" id="ContactFormName" name="contact[name]"
                class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary p-3">
       </div>
       <div>
-        <label for="ContactFormEmail" class="block text-base font-medium text-brand-text mb-2">Email</label>
+        <label for="ContactFormEmail" class="block text-base font-medium text-brand-text-sub mb-2">Email</label>
         <input type="email" id="ContactFormEmail" name="contact[email]"
                class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary p-3">
       </div>
       <div>
-        <label for="ContactFormMessage" class="block text-base font-medium text-brand-text mb-2">Message</label>
+        <label for="ContactFormMessage" class="block text-base font-medium text-brand-text-sub mb-2">Message</label>
         <textarea id="ContactFormMessage" name="contact[body]" rows="8"
                   class="w-full bg-brand-card rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:border-brand-primary p-3 resize-y"></textarea>
       </div>

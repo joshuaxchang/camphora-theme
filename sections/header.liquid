@@ -8,14 +8,14 @@
             <svg id="hamburger-icon-open" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h12"></path>
             </svg>
-            <span id="hamburger-icon-close" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden text-4xl font-semibold leading-none text-gray-700">&times;</span>
+            <span id="hamburger-icon-close" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden text-4xl font-semibold leading-none text-brand-text-main">&times;</span>
           </button>
         </div>
 
         <nav class="hidden md:flex md:grow">
           <ul class="flex grow flex-wrap items-center">
             {%- for link in linklists[section.settings.main_menu].links -%}
-              <li><a href="{{ link.url }}" class="font-semibold text-gray-700 hover:text-brand-text px-4 py-2">{{ link.title }}</a></li>
+              <li><a href="{{ link.url }}" class="font-semibold text-brand-text-sub hover:text-brand-primary px-4 py-2">{{ link.title }}</a></li>
             {%- endfor -%}
           </ul>
         </nav>
@@ -24,7 +24,7 @@
       <div class="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 md:flex-1 md:order-first">
         <a href="/" class="flex items-center gap-2">
           <img src="{{ 'camphora-logo.svg' | asset_url }}" alt="Camphora Studio Logo" class="w-8 h-8">
-          <span class="text-lg sm:text-xl font-bold text-brand-text">Camphora Studio</span>
+          <span class="text-lg sm:text-xl font-bold text-brand-text-sub">Camphora Studio</span>
         </a>
       </div>
 
@@ -43,14 +43,14 @@
     <div class="p-4">
       <ul class="space-y-4 text-center">
         {%- for link in linklists[section.settings.main_menu].links -%}
-          <li><a href="{{ link.url }}" class="block py-2 text-xl font-semibold text-gray-700 hover:text-brand-text">{{ link.title }}</a></li>
+          <li><a href="{{ link.url }}" class="block py-2 text-xl font-semibold text-brand-text-sub hover:text-brand-primary">{{ link.title }}</a></li>
         {%- endfor -%}
       </ul>
     </div>
     <div class="p-4 border-t border-white/10">
       <ul class="space-y-2 text-center">
         {%- for link in linklists[section.settings.mobile_bottom_menu].links -%}
-          <li><a href="{{ link.url }}" class="block py-1 text-sm text-gray-600 hover:text-brand-text">{{ link.title }}</a></li>
+          <li><a href="{{ link.url }}" class="block py-1 text-sm text-gray-600 hover:text-brand-text-sub">{{ link.title }}</a></li>
         {%- endfor -%}
       </ul>
     </div>
