@@ -1,9 +1,5 @@
-{% comment %}
-  We are putting the padding and max-width container back in.
-  This is the most reliable way to handle spacing.
-{% endcomment %}
-<div class="max-w-5xl mx-auto px-4 py-8 md:py-16">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+<div class="max-w-5xl mx-auto px-4 py-2 md:py-16">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-x-12 items-start">
     <div class="w-full md:sticky top-24">
       <div class="swiper main-gallery aspect-square rounded-lg shadow-lg mb-4 overflow-hidden relative">
         <div class="swiper-wrapper">
@@ -52,7 +48,7 @@
       </div>
     </div>
 
-    <div class="pt-4">
+    <div class="md:pt-4">
       <h1 class="font-heading text-4xl font-bold mb-4 text-brand-text-sub">{{ product.title }}</h1>
 
       {%- form 'product', product, id: "product-form", novalidate: 'novalidate' -%}
