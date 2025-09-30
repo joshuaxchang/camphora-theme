@@ -1,5 +1,5 @@
 {% comment %} 
-  The header bar remains a consistent height.
+  The header bar remains a consistent height and style.
 {% endcomment %}
 <header class="relative md:h-20 max-h-20 md:max-h-20 z-30">
   <div class="max-w-5xl mx-auto px-2 sm:px-4">
@@ -44,16 +44,18 @@
 </header>
 
 {% comment %} 
-  This is the new partial-screen overlay for the mobile menu.
-  It's positioned fixed to sit just below the header.
+  The outer div is a full-screen, semi-transparent click-catcher that dims the background.
 {% endcomment %}
-<div id="mobile-menu-overlay" class="md:hidden fixed top-0 left-0 right-0 z-20 bg-brand-bg/80 backdrop-blur-md hidden">
-  <div id="mobile-menu-content" class="pt-20 pb-4">
-    <ul class="space-y-2 text-center">
-      {%- for link in linklists[section.settings.main_menu].links -%}
-        <li><a href="{{ link.url }}" class="block py-2 text-xl font-semibold text-brand-text-sub hover:text-brand-primary">{{ link.title }}</a></li>
-      {%- endfor -%}
-    </ul>
+<div id="mobile-menu-overlay" class="md:hidden fixed top-0 left-0 right-0 bottom-0 backdrop-blur-sm z-20 bg-black/25 opacity-0 invisible transition-opacity duration-300 ease-in-out">
+  {% comment %} 
+    The inner div is the menu "card" with a solid background.
+  {% endcomment %}
+  <div id="mobile-menu-content" class="bg-brand-bg">
+      <ul class="space-y-4 text-center p-4 pt-24">
+        {%- for link in linklists[section.settings.main_menu].links -%}
+          <li><a href="{{ link.url }}" class="block py-2 text-xl font-semibold text-brand-text-sub hover:text-brand-primary">{{ link.title }}</a></li>
+        {%- endfor -%}
+      </ul>
   </div>
 </div>
 
@@ -67,37 +69,46 @@ document.addEventListener('DOMContentLoaded', () => {
   const openIcon = document.getElementById('hamburger-icon-open');
   const closeIcon = document.getElementById('hamburger-icon-close');
   
+  // --- DOM Manipulation Hack ---
+  // Move the overlay to the body to escape Shopify's section wrapper.
+  if (mobileMenuOverlay) {
+    document.body.appendChild(mobileMenuOverlay);
+  }
+
   // --- Sticky Header Styling ---
   if (headerSection) {
-    // Note: The z-index of the header (z-30) must be higher than the overlay (z-20).
-    headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md', 'sticky', 'top-0', 'z-30', 'transition-colors', 'duration-200');
+    headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md', 'sticky', 'top-0', 'z-30');
   }
 
   // --- Master Menu Toggle Function ---
-  const toggleMenu = (open) => {
+  const toggleMenu = (open, callback) => {
+    const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
+    if (open === isExpanded) return;
+
     if (open) {
       document.body.classList.add('body-no-scroll');
-      
-      // Make header transparent to avoid "double blur" effect with the overlay.
-      headerSection.classList.remove('bg-brand-bg/80', 'backdrop-blur-md');
-      headerSection.classList.add('bg-transparent');
-      
-      // Instantly show the overlay.
-      mobileMenuOverlay.classList.remove('hidden');
+      mobileMenuOverlay.classList.remove('invisible');
+      requestAnimationFrame(() => {
+        mobileMenuOverlay.classList.remove('opacity-0');
+      });
       
       openIcon.classList.add('hidden');
       closeIcon.classList.remove('hidden');
       hamburgerButton.setAttribute('aria-expanded', 'true');
       
-    } else {
-      document.body.classList.remove('body-no-scroll');
+      if (typeof callback === 'function') callback();
       
-      // Give the glass effect back to the header.
-      headerSection.classList.add('bg-brand-bg/80', 'backdrop-blur-md');
-      headerSection.classList.remove('bg-transparent');
+    } else {
+      const onTransitionEnd = () => {
+        mobileMenuOverlay.classList.add('invisible'); 
+        document.body.classList.remove('body-no-scroll');
+        if (typeof callback === 'function') callback();
+        mobileMenuOverlay.removeEventListener('transitionend', onTransitionEnd);
+      };
+      
+      mobileMenuOverlay.addEventListener('transitionend', onTransitionEnd, { once: true });
 
-      // Instantly hide the overlay.
-      mobileMenuOverlay.classList.add('hidden');
+      mobileMenuOverlay.classList.add('opacity-0');
       
       openIcon.classList.remove('hidden');
       closeIcon.classList.add('hidden');
@@ -105,37 +116,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // --- Hamburger Button Click ---
+  // --- Event Listeners ---
   hamburgerButton.addEventListener('click', () => {
     const isExpanded = hamburgerButton.getAttribute('aria-expanded') === 'true';
     toggleMenu(!isExpanded);
   });
 
+  mobileMenuOverlay.addEventListener('click', (event) => {
+    if (event.target === mobileMenuOverlay) {
+      toggleMenu(false);
+    }
+  });
+
+
   // --- Unified Navigation Handler for All Header & Menu Links ---
-  // The selector now includes links in the new overlay.
   const allNavLinks = document.querySelectorAll('header a, #mobile-menu-overlay a');
   allNavLinks.forEach(link => {
     link.addEventListener('click', (event) => {
       const isMobileMenuOpen = hamburgerButton.getAttribute('aria-expanded') === 'true';
-      
-      // If the mobile menu is open, we always want to close it before navigating.
-      if (isMobileMenuOpen) {
-        // We don't need a callback or transitionend listener for instant toggles.
-        toggleMenu(false);
-      }
-      
-      // The rest of the logic can proceed as normal after the menu is closed.
-      // NOTE: For instant navigation, we don't preventDefault unless we're smooth scrolling.
+      const destination = link.href;
       const isProductsLinkOnHomepage = link.getAttribute('href').endsWith('/#products') && window.location.pathname === '/';
+
       if (isProductsLinkOnHomepage) {
         event.preventDefault();
-        const target = document.querySelector('#products');
-        if (target) {
-            // A short timeout can help ensure the scroll happens after the menu is visually gone.
-            setTimeout(() => {
-                target.scrollIntoView({ behavior: 'smooth' });
-            }, 50);
+        const performScroll = () => {
+          const target = document.querySelector('#products');
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        };
+        
+        if (isMobileMenuOpen) {
+          toggleMenu(false, performScroll);
+        } else {
+          performScroll();
         }
+      } else if (isMobileMenuOpen) {
+        event.preventDefault();
+        const navigate = () => { window.location.href = destination; };
+        toggleMenu(false, navigate);
       }
     });
   });
