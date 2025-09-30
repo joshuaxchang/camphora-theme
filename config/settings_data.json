@@ -8,5 +8,30 @@
  * ------------------------------------------------------------
  */
 {
-  "current": {}
+  "current": {
+    "sections": {
+      "header": {
+        "type": "header",
+        "settings": {
+          "main_menu": "main-menu",
+          "mobile_bottom_menu": "mobile-bottom"
+        }
+      },
+      "footer": {
+        "type": "footer",
+        "settings": {
+          "menu": "footer",
+          "newsletter_enable": true,
+          "newsletter_subheading": "<p>Get notified about new products. We respect your inbox and will only email you a couple of times a year.</p>",
+          "newsletter_button_text": "Subscribe to our Newsletter",
+          "show_payment_icons": true
+        }
+      },
+      "cart-drawer": {
+        "type": "cart-drawer",
+        "settings": {}
+      }
+    },
+    "content_for_index": []
+  }
 }
