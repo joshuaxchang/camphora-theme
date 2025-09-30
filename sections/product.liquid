@@ -295,12 +295,10 @@
       })
         .then((response) => {
           if (!response.ok) throw new Error(response.status);
-          // After adding, fetch the updated cart data
           return fetch('/cart.js');
         })
         .then((response) => response.json())
         .then((cart) => {
-          // Update the cart count in the header
           const cartCountSpan = document.getElementById('cart-item-count');
           if (cartCountSpan) {
             cartCountSpan.textContent = cart.item_count;
@@ -309,9 +307,10 @@
             }
           }
           
+          // Remove the opacity class for a solid success state
+          addToCartButton.classList.remove('disabled:opacity-70');
           addToCartButton.querySelector('span').textContent = '✓ Added!';
           
-          // Shake the cart icon
           document.querySelectorAll('#open-cart-button').forEach((btn) => {
             btn.classList.add('animate-shake');
             setTimeout(() => {
@@ -320,11 +319,14 @@
           });
 
           document.dispatchEvent(new CustomEvent('cart:added'));
+          
           setTimeout(() => {
             addToCartButton.disabled = false;
             buyNowButton.disabled = false;
+            // Add the opacity class back when resetting
+            addToCartButton.classList.add('disabled:opacity-70');
             addToCartButton.querySelector('span').textContent = 'Add to Cart';
-          }, 1000);
+          }, 2000); // Increased to 2s for better visibility
         })
         .catch((error) => {
           console.error(error);
