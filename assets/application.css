@@ -111,7 +111,7 @@ input[type=number] {
 }
 
 [id] {
-  scroll-margin-top: 5rem;
+  scroll-margin-top: 7.5rem;
 }
 
 @tailwind base;
